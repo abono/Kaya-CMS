@@ -2,24 +2,33 @@ import React, { useState, useReducer, useEffect, useContext } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
+import { UserContext } from '../context/UserContext'
+
 import { APICallInit, APICallState } from "../services/ServiceUtil";
 import { SearchWebPageTemplate, DeleteWebPageTemplate } from "../services/WebPageTemplateService";
 
 function WebPageTemplateList() {
+    const [ userContext, userContextDispatch ] = useContext(UserContext);
 
-    const [ errorMessage, setErrorMessage ] = useState('');
     const [ webPageTemplates, setWebPageTemplates ] = useState( [ ] );
     const [ searchState, searchDispatch ] = useReducer(APICallState, APICallInit);
 
     useEffect(() => {
+        userContextDispatch( { type: "ALERT_MESSAGE", payload: "Loading templates" });
         SearchWebPageTemplate(1, 50, searchDispatch);
     }, []);
 
     useEffect(() => {
+        if (searchState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: searchState.errorMessage });
+        } else if (searchState.data) {
+            userContextDispatch( { type: "ALERT_CLOSE" });
+        }
         setWebPageTemplates(searchState.data && searchState.data.items ? searchState.data.items : [ ]);
     }, [searchState]);
 
     const deleteWebPageTemplate = (webPageTemplate) => {
+        userContextDispatch( { type: "ALERT_CLOSE" });
         if (window.confirm("Are you sure you want to delete " + webPageTemplate.name)) {
             // DeleteWebPageTemplate(webPageTemplate.webPageTemplateId, (action) => {
             //     if (action.type === 'FETCH_SUCCESS') {
@@ -30,7 +39,8 @@ function WebPageTemplateList() {
     };
 
     const webPageTemplateList = webPageTemplates.map(webPageTemplate => <tr key={webPageTemplate.webPageTemplateId}>
-            <td style={{whiteSpace: 'nowrap'}}>{webPageTemplate.name}</td>
+            <td>{webPageTemplate.name}{webPageTemplate.edited ? ' (' + webPageTemplate.nameEdits + ')' : ''}</td>
+            <td>{webPageTemplate.edited ? "YES" : ""}</td>
             <td>
                 <ButtonGroup>
                     <Button size="sm" color="primary" tag={Link} to={`/webPageTemplate/${webPageTemplate.webPageTemplateId}`}>Edit</Button>
@@ -42,25 +52,6 @@ function WebPageTemplateList() {
 
     return <div>
         <Container fluid>
-
-            {errorMessage &&
-                <div className="alert alert-danger" role="alert">
-                    {errorMessage}
-                </div>
-            }
-
-            {searchState.isLoading &&
-                <div className="alert alert-warning" role="alert">
-                    Loading...
-                </div>
-            }
-
-            {searchState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {searchState.errorMessage}
-                </div>
-            }
-
             <div className="float-right">
                 <Button color="success" tag={Link} to={`/webPageTemplate/new`}>Add Template</Button>
             </div>
@@ -68,8 +59,9 @@ function WebPageTemplateList() {
             <Table className="mt-4">
                 <thead>
                 <tr>
-                    <th width="30%">Name</th>
-                    <th width="40%">Actions</th>
+                    <th>Name</th>
+                    <th>Contains Edits</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>

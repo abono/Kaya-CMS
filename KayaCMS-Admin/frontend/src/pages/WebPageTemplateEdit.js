@@ -1,18 +1,20 @@
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer, useEffect, useContext } from 'react';
 import { Button, Container, Form, FormGroup, Input, Label } from 'reactstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+
+import { UserContext } from '../context/UserContext'
 
 import { APICallInit, APICallState } from "../services/ServiceUtil";
 import { GetWebPageTemplate, CreateWebPageTemplate, UpdateWebPageTemplate } from "../services/WebPageTemplateService";
 
-const DEFAULT_NEW_TEMPLATE = <html>
-    <head>
-        <title>&#123;webPage.title&#125;</title>
-    </head>
-    <body>
-        &#123;webPage.content&#125;
-    </body>
-</html>
+const DEFAULT_NEW_TEMPLATE = "<html>\n\n"
+    + "<head>\n"
+    + "    <title>${webPage.title}</title>\n"
+    + "</head>\n\n"
+    + "<body>\n"
+    + "    ${webPage.content}\n"
+    + "</body>\n\n"
+    + "</html>\n";
 
 function WebPageTemplateEdit() {
     const { id } = useParams();
@@ -20,14 +22,17 @@ function WebPageTemplateEdit() {
 
     const navigate = useNavigate();
 
+    const [ , userContextDispatch ] = useContext(UserContext);
+
     const [ readState, readDispatch ] = useReducer(APICallState, APICallInit);
     const [ writeState, writeDispatch ] = useReducer(APICallState, APICallInit);
-    const [ errors, setErrors ] = useState( [ ] );
+
     const [ name, setName ] = useState('');
     const [ content, setContent ] = useState(isNew ? DEFAULT_NEW_TEMPLATE : '');
 
     useEffect(() => {
         if (!isNew) {
+            userContextDispatch( { type: "ALERT_MESSAGE", payload: "Loading template" });
             GetWebPageTemplate(id, readDispatch);
         }
     }, [id, isNew]);
@@ -35,14 +40,27 @@ function WebPageTemplateEdit() {
     useEffect(() => {
         console.log("State changed", readState.data);
         if (readState && readState.data) {
-            setName(readState.data.name);
-            setContent(readState.data.content);
+            userContextDispatch( { type: "ALERT_CLOSE" });
+
+            if (readState.data.edited) {
+                setName(readState.data.nameEdits);
+                setContent(readState.data.contentEdits);
+            } else {
+                setName(readState.data.name);
+                setContent(readState.data.content);
+            }
+        }
+        if (readState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: readState.errorMessage });
         }
     }, [readState]);
 
     useEffect(() => {
         if (writeState.data && !writeState.isError) {
             navigate("/webPageTemplate");
+        }
+        if (writeState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: writeState.errorMessage });
         }
     }, [writeState]);
 
@@ -62,54 +80,28 @@ function WebPageTemplateEdit() {
             // Required field
             err.push('Please enter a name');
         }
-        setErrors(err);
         if (err.length === 0) {
             const webPageTemplate = {
-                name: name,
-                content: content,
+                nameEdits: name,
+                contentEdits: content,
             };
             if (isNew) {
+                userContextDispatch( { type: "ALERT_MESSAGE", payload: "Creating new template" } );
                 CreateWebPageTemplate(webPageTemplate, writeDispatch);
             } else {
                 webPageTemplate.webPageTemplateId = id;
+                userContextDispatch( { type: "ALERT_MESSAGE", payload: "Updating template" } );
                 UpdateWebPageTemplate(webPageTemplate, writeDispatch);
             }
+        } else {
+            userContextDispatch( { type: "ALERT_ERROR", payload: err.map((error, index) => 
+                <div key={index}>{error}</div>
+            ) } );
         }
     }
 
     return <div>
         <Container>
-
-            {readState.isLoading &&
-                <div className="alert alert-warning" role="alert">
-                    Loading...
-                </div>
-            }
-
-            {readState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {readState.errorMessage}
-                </div>
-            }
-
-            {writeState.isLoading &&
-                <div className="alert alert-warning" role="alert">
-                    Saving...
-                </div>
-            }
-
-            {writeState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {writeState.errorMessage}
-                </div>
-            }
-
-            {errors.map((error, index) =>
-                <div key={index} className="alert alert-danger" role="alert">
-                    {error}
-                </div>
-            )}
-
             <Form onSubmit={handleSubmit}>
                 <FormGroup>
                     <Label for="name">Name</Label>
@@ -118,8 +110,8 @@ function WebPageTemplateEdit() {
                 </FormGroup>
                 <FormGroup>
                     <Label for="email">Template</Label>
-                    <Input type="textarea" name="content" id="content"
-                            onChange={updateContent} class="form-control" rows="20">{content}</Input>
+                    <Input type="textarea" name="content" id="content" value={content}
+                            onChange={updateContent} className="form-control" rows="20" />
                 </FormGroup>
                 <FormGroup>
                     <Button color="primary" type="submit">Save</Button>{' '}

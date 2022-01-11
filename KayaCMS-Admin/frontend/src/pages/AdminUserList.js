@@ -31,8 +31,8 @@ function AdminUserList() {
         if (adminUser.adminUserId === userContext.user.adminUserId) {
             userContextDispatch( { type: "ALERT_ERROR", payload: "You can not delete your own account." });
         } else {
+            userContextDispatch( { type: "ALERT_CLOSE" });
             if (window.confirm("Are you sure you want to delete " + adminUser.firstName + " " + adminUser.lastName)) {
-                userContextDispatch( { type: "ALERT_CLOSE" });
                 DeleteAdminUser(adminUser.adminUserId, (action) => {
                     if (action.type === 'FETCH_SUCCESS') {
                         SearchAdminUser(1, 50, searchDispatch);

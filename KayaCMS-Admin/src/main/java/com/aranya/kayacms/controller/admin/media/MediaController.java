@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,9 +47,9 @@ public class MediaController extends BaseAdminController {
     response.setModifyDate(item.getCreateDate());
     response.setPublishDate(item.getCreateDate());
     response.setEdited(
-        ObjectUtils.notEqual(item.getType(), item.getTypeEdits())
-            || ObjectUtils.notEqual(item.getPath(), item.getPathEdits())
-            || ObjectUtils.notEqual(item.getContent(), item.getContentEdits()));
+        !StringUtils.isAllEmpty(item.getTypeEdits())
+            || !StringUtils.isAllEmpty(item.getPathEdits())
+            || item.getContentEdits().length > 0);
   }
 
   private MediaResponse convertSearchItem(Media item) {

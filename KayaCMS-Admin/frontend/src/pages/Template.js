@@ -14,13 +14,14 @@ import Home from './Home';
 import AdminUserList from './AdminUserList';
 import AdminUserEdit from './AdminUserEdit';
 import MediaList from './MediaList';
-import MediaEdit from "./MediaEdit";
+import MediaEdit from './MediaEdit';
 import RedirectList from './RedirectList';
-import RedirectEdit from "./RedirectEdit";
+import RedirectEdit from './RedirectEdit';
 import WebPageList from './WebPageList';
-import WebPageEdit from "./WebPageEdit";
+import WebPageEdit from './WebPageEdit';
 import WebPageTemplateList from './WebPageTemplateList';
-import WebPageTemplateEdit from "./WebPageTemplateEdit";
+import WebPageTemplateEdit from './WebPageTemplateEdit';
+import Publish from './Publish'
 
 function Template() {
   const [ userContext, userContextDispatch ] = useContext(UserContext);
@@ -79,6 +80,7 @@ function Template() {
           <Route path={`/webPage/:id`} element={<WebPageEdit />}></Route>
           <Route path={`/webPageTemplate`} exact={true} element={<WebPageTemplateList />}></Route>
           <Route path={`/webPageTemplate/:id`} element={<WebPageTemplateEdit />}></Route>
+          <Route path={`/publish`} exact={true} element={<Publish />}></Route>
         </Routes>
       </Router>
     </div>

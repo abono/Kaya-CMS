@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,13 +41,14 @@ public class WebPageTemplateController extends BaseAdminController {
   private void populateBase(WebPageTemplate item, WebPageTemplateResponse response) {
     response.setWebPageTemplateId(item.getWebPageTemplateId());
     response.setName(item.getName());
+    response.setNameEdits(item.getNameEdits());
 
     response.setCreateDate(item.getCreateDate());
     response.setModifyDate(item.getCreateDate());
     response.setPublishDate(item.getCreateDate());
     response.setEdited(
-        ObjectUtils.notEqual(item.getName(), item.getNameEdits())
-            || ObjectUtils.notEqual(item.getContent(), item.getContentEdits()));
+        !StringUtils.isAllEmpty(item.getNameEdits())
+            || !StringUtils.isAllEmpty(item.getContentEdits()));
   }
 
   private WebPageTemplateResponse convertSearchItem(WebPageTemplate item) {
@@ -64,7 +65,6 @@ public class WebPageTemplateController extends BaseAdminController {
     populateBase(item, response);
 
     response.setContent(item.getContent());
-    response.setNameEdits(item.getNameEdits());
     response.setContentEdits(item.getContentEdits());
 
     return response;
@@ -113,14 +113,17 @@ public class WebPageTemplateController extends BaseAdminController {
       HttpServletRequest request, @RequestBody WebPageTemplateRequest webPageTemplateRequest)
       throws KayaServiceException, KayaAccessDeniedException, URISyntaxException {
 
+    WebSite webSite = RequestUtil.getWebSite(request);
+
     verifyLoggedIn(request);
 
     WebPageTemplate webPageTemplate =
         WebPageTemplate.builder()
-            .name(webPageTemplateRequest.getNameEdits())
+            .name("")
             .content("")
             .nameEdits(webPageTemplateRequest.getNameEdits())
             .contentEdits(webPageTemplateRequest.getContentEdits())
+            .webSite(webSite)
             .build();
 
     webPageTemplate = webPageTemplateService.createWebPageTemplate(webPageTemplate);

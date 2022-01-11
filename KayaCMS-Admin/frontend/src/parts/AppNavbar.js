@@ -27,8 +27,9 @@ function AppNavbar() {
                     <NavbarBrand style={{float: "left"}} tag={Link} to={`/adminUser`}>Admin Users</NavbarBrand>
                     <NavbarBrand style={{float: "left"}} tag={Link} to={`/webPageTemplate`}>Templates</NavbarBrand>
                     <NavbarBrand style={{float: "left"}} tag={Link} to={`/webPage`}>Pages</NavbarBrand>
-                    <NavbarBrand style={{float: "left"}} tag={Link} to={`/media`}>Files</NavbarBrand>
-                    <NavbarBrand style={{float: "left"}} tag={Link} to={`/redirect`}>Redirects</NavbarBrand>
+                    {/* <NavbarBrand style={{float: "left"}} tag={Link} to={`/media`}>Files</NavbarBrand> */}
+                    {/* <NavbarBrand style={{float: "left"}} tag={Link} to={`/redirect`}>Redirects</NavbarBrand> */}
+                    <NavbarBrand style={{float: "left"}} tag={Link} to={`/publish`}>Publish Changes</NavbarBrand>
                     <NavbarBrand style={{float: "right"}} onClick={logOut}>Log Out</NavbarBrand>
                     <NavbarBrand style={{float: "right"}}>Welcome {userContext.user.firstName}</NavbarBrand>
                 </div>

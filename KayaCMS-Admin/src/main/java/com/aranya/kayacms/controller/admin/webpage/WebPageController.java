@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,12 +49,12 @@ public class WebPageController extends BaseAdminController {
     response.setModifyDate(item.getCreateDate());
     response.setPublishDate(item.getCreateDate());
     response.setEdited(
-        ObjectUtils.notEqual(item.getType(), item.getTypeEdits())
-            || ObjectUtils.notEqual(item.getPath(), item.getPathEdits())
-            || ObjectUtils.notEqual(item.getTitle(), item.getTitleEdits())
-            || ObjectUtils.notEqual(item.getDescription(), item.getDescriptionEdits())
-            || ObjectUtils.notEqual(item.getContent(), item.getContentEdits())
-            || ObjectUtils.notEqual(item.getParameters(), item.getParametersEdits()));
+        !StringUtils.isAllEmpty(item.getTypeEdits())
+            || !StringUtils.isAllEmpty(item.getPathEdits())
+            || !StringUtils.isAllEmpty(item.getTitleEdits())
+            || !StringUtils.isAllEmpty(item.getDescriptionEdits())
+            || !StringUtils.isAllEmpty(item.getContentEdits())
+            || !StringUtils.isAllEmpty(item.getParametersEdits()));
   }
 
   private WebPageResponse convertSearchItem(WebPage item) {
