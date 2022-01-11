@@ -1,6 +1,8 @@
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer, useEffect, useContext } from 'react';
 import { Button, Container, Form, FormGroup, Input, Label } from 'reactstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+
+import { UserContext } from '../context/UserContext'
 
 import { APICallInit, APICallState } from "../services/ServiceUtil";
 import { GetAdminUser, CreateAdminUser, UpdateAdminUser } from "../services/AdminUserService";
@@ -13,9 +15,11 @@ function AdminUserEdit() {
 
     const navigate = useNavigate();
 
+    const [ , userContextDispatch ] = useContext(UserContext);
+
     const [ readState, readDispatch ] = useReducer(APICallState, APICallInit);
     const [ writeState, writeDispatch ] = useReducer(APICallState, APICallInit);
-    const [ errors, setErrors ] = useState( [ ] );
+    
     const [ firstName, setFirstName ] = useState('');
     const [ lastName, setLastName ] = useState('');
     const [ email, setEmail ] = useState('');
@@ -25,6 +29,7 @@ function AdminUserEdit() {
 
     useEffect(() => {
         if (!isNew) {
+            userContextDispatch( { type: "ALERT_MESSAGE", payload: "Loading admin user" });
             GetAdminUser(id, readDispatch);
         }
     }, [id, isNew]);
@@ -32,16 +37,24 @@ function AdminUserEdit() {
     useEffect(() => {
         console.log("State changed", readState.data);
         if (readState && readState.data) {
+            userContextDispatch( { type: "ALERT_CLOSE" });
+
             setFirstName(readState.data.firstName);
             setLastName(readState.data.lastName);
             setEmail(readState.data.email);
             setUserName(readState.data.userName);
+        }
+        if (readState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: readState.errorMessage });
         }
     }, [readState]);
 
     useEffect(() => {
         if (writeState.data && !writeState.isError) {
             navigate("/adminUser");
+        }
+        if (writeState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: writeState.errorMessage });
         }
     }, [writeState]);
 
@@ -109,7 +122,6 @@ function AdminUserEdit() {
                 err.push('Password must ' + VALID_PASSWORD_DESCRIPTION);
             }
         }
-        setErrors(err);
         if (err.length === 0) {
             const adminUser = {
                 firstName: firstName,
@@ -119,50 +131,25 @@ function AdminUserEdit() {
             };
             if (isNew) {
                 adminUser.password = password;
+                userContextDispatch( { type: "ALERT_MESSAGE", payload: "Creating new user" } );
                 CreateAdminUser(adminUser, writeDispatch);
             } else {
                 adminUser.adminUserId = id;
                 if (password.trim() !== '') {
                     adminUser.password = password;
                 }
+                userContextDispatch( { type: "ALERT_MESSAGE", payload: "Updating user" } );
                 UpdateAdminUser(adminUser, writeDispatch);
             }
+        } else {
+            userContextDispatch( { type: "ALERT_ERROR", payload: err.map((error, index) => 
+                <div key={index}>{error}</div>
+            ) } );
         }
     }
 
     return (
         <Container>
-
-            {readState.isLoading &&
-                <div className="alert alert-warning" role="alert">
-                    Loading...
-                </div>
-            }
-
-            {readState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {readState.errorMessage}
-                </div>
-            }
-
-            {writeState.isLoading &&
-                <div className="alert alert-warning" role="alert">
-                    Saving...
-                </div>
-            }
-
-            {writeState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {writeState.errorMessage}
-                </div>
-            }
-
-            {errors.map((error, index) =>
-                <div key={index} className="alert alert-danger" role="alert">
-                    {error}
-                </div>
-            )}
-
             <Form onSubmit={handleSubmit}>
                 <FormGroup>
                     <Label for="name">First Name</Label>

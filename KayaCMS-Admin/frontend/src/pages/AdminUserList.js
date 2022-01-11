@@ -14,14 +14,14 @@ function AdminUserList() {
     const [ searchState, searchDispatch ] = useReducer(APICallState, APICallInit);
 
     useEffect(() => {
-        userContextDispatch( { type: "ALERT_MESSAGE", payload: "Loading..." });
+        userContextDispatch( { type: "ALERT_MESSAGE", payload: "Loading admin users" });
         SearchAdminUser(1, 50, searchDispatch);
     }, []);
 
     useEffect(() => {
         if (searchState.isError) {
             userContextDispatch( { type: "ALERT_ERROR", payload: searchState.errorMessage });
-        } else {
+        } else if (searchState.data) {
             userContextDispatch( { type: "ALERT_CLOSE" });
         }
         setAdminUsers(searchState.data && searchState.data.items ? searchState.data.items : [ ]);
