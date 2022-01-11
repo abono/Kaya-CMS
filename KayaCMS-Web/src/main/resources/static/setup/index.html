@@ -1,0 +1,249 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<title>Kaya Setup</title>
+	
+	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="jquery/jquery-ui.css" rel="stylesheet">
+	
+	<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="jquery/jquery.js"></script>
+	<script src="jquery/jquery-ui.js"></script>
+	
+	<script src="https://cdn.tiny.cloud/1/czzk48bt36x9yhmeg6vebrudonki4wyoyw2tufb2zrsz37v1/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+</head>
+
+<body>
+
+<h1>New Kaya Web Site Setup</h1>
+
+<div style="display: none;" id="adminUser">
+	<h2>Create Admin User</h2>
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<form action="#" id="adminUserForm" method="POST">
+					<div class="form-group">
+						<label for="firstName">First Name:</label>
+						<input type="text" class="form-control" id="firstName" placeholder="User's first name">
+					</div>
+					
+					<div class="form-group">
+						<label for="lastName">Last Name:</label>
+						<input type="text" class="form-control" id="lastName" placeholder="User's last name">
+					</div>
+					
+					<div class="form-group">
+						<label for="email">Email:</label>
+						<input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Email address">
+						<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+					</div>
+					
+					<div class="form-group">
+						<label for="userName">User Name:</label>
+						<input type="text" class="form-control" id="userName" aria-describedby="userNameHelp" placeholder="User name">
+						<small id="userNameHelp" class="form-text text-muted">Name used when logging in.</small>
+					</div>
+					
+					<div class="form-group">
+						<label for="password">Password:</label>
+						<input type="password" class="form-control" id="password" aria-describedby="passwordHelp" placeholder="Log in password">
+						<small id="passwordHelp" class="form-text text-muted">Please use a secure password.</small>
+					</div>
+					
+					<input type="submit" value="Create User" class="btn btn-primary" />
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div style="display: none;" id="webPageTemplate">
+	<h2>Create Web Page Template</h2>
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<form action="#" id="webPageTemplateForm" method="POST">
+					<div class="form-group">
+						<label for="webPageTemplateName">Template Name:</label>
+						<input type="text" class="form-control" id="webPageTemplateName" placeholder="Name for the web page template">
+					</div>
+					
+					<div class="form-group">
+						<label for="webPageTemplateContent">Content:</label>
+						<textarea id="webPageTemplateContent" name="webPageTemplateContent" class="form-control" rows="20"></textarea>
+					</div>
+					
+					<input type="submit" value="Create Web Page Template" class="btn btn-primary" />
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div style="display: none;" id="webPage">
+	<h2>Create Home Page</h2>
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<form action="#" id="webPageForm" method="POST">
+					<div class="form-group">
+						<label for="webPageTitle">Page Title:</label>
+						<input type="text" class="form-control" id="webPageTitle" placeholder="Web page title">
+					</div>
+					
+					<div class="form-group">
+						<label for="webPageDescription">Description:</label>
+						<input type="text" class="form-control" id="webPageDescription" placeholder="Description seen by search engines">
+					</div>
+					
+					<div class="form-group">
+						<label for="webPageContent">Content:</label>
+						<textarea id="webPageContent" name="webPageContent"></textarea>
+					</div>
+					
+					<input type="submit" value="Create Web Page" class="btn btn-primary" />
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script language="JavaScript">
+	function checkAdminUser() {
+		$.getJSON("../api/setup/adminUser/exists", function( data ) {
+			if (data) {
+				$("#adminUser").hide();
+				checkWebPageTemplate();
+			} else {
+				$("#adminUser").show();
+			}
+		});
+	}
+
+	function checkWebPageTemplate() {
+		$.getJSON("../api/setup/webPageTemplate/exists", function( data ) {
+			if (data) {
+				$("#webPageTemplate").hide();
+				checkWebPage();
+			} else {
+				$("#webPageTemplate").show();
+			}
+		});
+	}
+
+	function checkWebPage() {
+		$.getJSON("../api/setup/webPage/exists", function( data ) {
+			if (data) {
+				$("#webPage").hide();
+				window.location.href = "/index.html";
+			} else {
+				$("#webPage").show();
+				tinymce.init({
+				    selector: "#webPageContent",
+				    plugins: [
+				        "advlist autolink lists link image charmap print preview anchor",
+				        "searchreplace visualblocks code fullscreen",
+				        "insertdatetime media table contextmenu paste"
+				    ],
+				    toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+					
+					setup: function(ed) {
+						ed.on('click', function(e) {
+							console.log('sssss');
+							tinymce.execCommand('mceToggleEditor',false,'content');
+						});
+					}
+				});
+			}
+		});
+	}
+
+	$( document ).ready(function() {
+		checkAdminUser();
+		
+		$("#adminUserForm").on('submit', function(e) {
+			e.preventDefault();
+			
+			$.ajax({
+                url: '../api/setup/adminUser/create',
+                type : "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType : 'json',
+                data : JSON.stringify({
+                	"firstName": $("#firstName").val(),
+                	"lastName": $("#lastName").val(),
+                	"email": $("#email").val(),
+                	"userName": $("#userName").val(),
+                	"password": $("#password").val()
+                }),
+                success : function(result) {
+                    checkAdminUser();
+                },
+                error: function(xhr, resp, text) {
+                    console.log(xhr, resp, text);
+                    alert(text);
+                }
+            });
+		});
+		
+		$("#webPageTemplateForm").on('submit', function(e) {
+			e.preventDefault();
+
+			$.ajax({
+                url: '../api/setup/webPageTemplate/create',
+                type : "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType : 'json',
+                data : JSON.stringify({
+                	"name": $("#webPageTemplateName").val(),
+                	"content": $("#webPageTemplateContent").val()
+                }),
+                success : function(result) {
+                	checkWebPageTemplate();
+                },
+                error: function(xhr, resp, text) {
+                    console.log(xhr, resp, text);
+                    alert(text);
+                }
+            });
+		});
+		
+		$("#webPageForm").on('submit', function(e) {
+			e.preventDefault();
+			
+			var content = tinyMCE.get('webPageContent').getContent();
+			if (!content || (content.trim().length == 0)) {
+				alert("Please provide content.");
+				return;
+			}
+
+			$.ajax({
+                url: '../api/setup/webPage/create',
+                type : "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType : 'json',
+                data : JSON.stringify({
+                	"title": $("#webPageTitle").val(),
+                	"description": $("#webPageDescription").val(),
+                	"content": content
+                }),
+                success : function(result) {
+                	checkWebPage();
+                },
+                error: function(xhr, resp, text) {
+                    console.log(xhr, resp, text);
+                    alert(text);
+                }
+            });
+		});
+	});
+</script>
+
+</body>
+
+</html>

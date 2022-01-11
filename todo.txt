@@ -1,0 +1,11 @@
+* One Web Site record - get rid of having to pass web site object around
+* Changes Services to interfaces with implementations
+* Exception handling with nice JSON response
+* Different types of exceptions mapped to different response codes
+* Encrypted passwords
+* Implement HTTP eTag
+* Implement preview mode
+
+Pluggable:
+ * Encryptor
+ * WYSIWYG Editor

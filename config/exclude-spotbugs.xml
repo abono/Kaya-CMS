@@ -1,0 +1,41 @@
+<!--
+  This file specifies a spotbugs filter for excluding reports that should not be considered errors.
+  
+  The format of this file is documented at:
+    https://spotbugs.readthedocs.io/en/latest/filter.html
+
+  When possible, please specify the full names of the bug codes, using the pattern attribute, to
+  make it clearer what reports are being suppressed.  You can find a listing of codes at:
+    https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html
+  -->
+
+<FindBugsFilter>
+
+  <!-- For example see https://github.com/undertow-io/undertow/blob/master/spotbugs-exclude.xml -->
+  <!-- =============================================================================================
+    Spot Bugs wants immutable beans all over the place to ensure that objects are not modified
+    unexpectedly.  This is all well and good but crudial libraries such as JPA/Hibernate require
+    setters on the beans in order to function properly.  Because of this, we will be turning off
+    these checks for our beans.
+  ============================================================================================== -->
+  <Match>
+    <Or>
+      <Bug pattern="EI_EXPOSE_REP"/>
+      <Bug pattern="EI_EXPOSE_REP2"/>
+    </Or>
+    <Class name="~com\.aranya\.kayacms\.beans\..*"/>
+  </Match>
+  
+  <!-- =============================================================================================
+    For some reason Spot Bugs is complaining about the service object instance variables which are
+    necessary to process requests.  We will turn this off until we find a way to deal with it
+    without having to add the exception.
+  ============================================================================================== -->
+  <Match>
+    <Or>
+      <Bug pattern="EI_EXPOSE_REP2"/>
+    </Or>
+    <Class name="~com\.aranya\.kayacms\.controller\.admin\..*Controller"/>
+  </Match>
+
+</FindBugsFilter>

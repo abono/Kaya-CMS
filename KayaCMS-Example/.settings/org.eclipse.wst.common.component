@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+        
+    <wb-module deploy-name="KayaCMS-Example-2.0.2-SNAPSHOT">
+                
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+                
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+                
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+                
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="KayaCMS-Core-2.0.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/KayaCMS-Core/KayaCMS-Core">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="KayaCMS-Web-2.0.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/KayaCMS-Web/KayaCMS-Web">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="KayaCMS-Admin-2.0.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/KayaCMS-Admin/KayaCMS-Admin">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="KayaCMS-DB-PostgreSQL-2.0.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/KayaCMS-DB-PostgreSQL/KayaCMS-DB-PostgreSQL">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+                
+        <property name="java-output-path" value="/KayaCMS-Web/target/classes"/>
+        <property name="context-root" value="KayaCMS-Example"/>
+            
+    </wb-module>
+    
+</project-modules>

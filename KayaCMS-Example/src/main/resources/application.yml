@@ -1,0 +1,10 @@
+spring:
+  profiles.active: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/kaya_cms
+    username: kaya
+    password: test-PassworD
+  http.converters.preferred-json-mapper: gson
+server:
+  port: 14150
+  error.path: /error
