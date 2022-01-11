@@ -1,7 +1,6 @@
 import React, { useState, useReducer, useEffect, useContext } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import Modal from "react-bootstrap/Modal";
 
 import { UserContext } from '../context/UserContext'
 
@@ -9,32 +8,31 @@ import { APICallInit, APICallState } from "../services/ServiceUtil";
 import { SearchAdminUser, DeleteAdminUser } from "../services/AdminUserService";
 
 function AdminUserList() {
-    const [ userContext, ] = useContext(UserContext);
+    const [ userContext, userContextDispatch ] = useContext(UserContext);
 
-    const [ closeModal, setCloseModal ] = useState(true);
-    const [ errorMessage, setErrorMessage ] = useState('');
     const [ adminUsers, setAdminUsers ] = useState( [ ] );
     const [ searchState, searchDispatch ] = useReducer(APICallState, APICallInit);
 
     useEffect(() => {
-        setCloseModal(false);
+        userContextDispatch( { type: "ALERT_MESSAGE", payload: "Loading..." });
         SearchAdminUser(1, 50, searchDispatch);
     }, []);
 
     useEffect(() => {
-        if (!searchState.isError) {
-            setCloseModal(false);
+        if (searchState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: searchState.errorMessage });
+        } else {
+            userContextDispatch( { type: "ALERT_CLOSE" });
         }
         setAdminUsers(searchState.data && searchState.data.items ? searchState.data.items : [ ]);
     }, [searchState]);
 
     const deleteAdminUser = (adminUser) => {
         if (adminUser.adminUserId === userContext.user.adminUserId) {
-            setCloseModal(false);
-            setErrorMessage("You can not delete your own account.");
+            userContextDispatch( { type: "ALERT_ERROR", payload: "You can not delete your own account." });
         } else {
             if (window.confirm("Are you sure you want to delete " + adminUser.firstName + " " + adminUser.lastName)) {
-                setCloseModal(false);
+                userContextDispatch( { type: "ALERT_CLOSE" });
                 DeleteAdminUser(adminUser.adminUserId, (action) => {
                     if (action.type === 'FETCH_SUCCESS') {
                         SearchAdminUser(1, 50, searchDispatch);
@@ -59,25 +57,6 @@ function AdminUserList() {
 
     return <div>
         <Container fluid>
-
-            {errorMessage &&
-                <div className="alert alert-danger" role="alert">
-                    {errorMessage}
-                </div>
-            }
-
-            <Modal show={!closeModal && searchState.isLoading}>
-                <Modal.Header>Loading</Modal.Header>
-                <Modal.Body>Loading data ...</Modal.Body>
-                <Modal.Footer><Button size="sm" color="secondary" onClick={() => setCloseModal(true)}>Close</Button></Modal.Footer>
-            </Modal>
-
-            {searchState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {searchState.errorMessage}
-                </div>
-            }
-
             <div className="float-right">
                 <Button color="success" tag={Link} to={`/adminUser/new`}>Add Admin User</Button>
             </div>

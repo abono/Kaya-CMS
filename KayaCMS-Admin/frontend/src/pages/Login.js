@@ -7,9 +7,9 @@ import { APICallInit, APICallState } from "../services/ServiceUtil";
 import { LogIn } from "../services/AuthService";
 
 function Login() {
-    const [ , userContextDispatch ] = useContext(UserContext);
+    const [ userContext, userContextDispatch ] = useContext(UserContext);
     const [ userState, userDispatch ] = useReducer(APICallState, APICallInit);
-    const [ errors, setErrors ] = useState( [ ] );
+
     const [ userName, setUserName ] = useState('');
     const [ password, setPassword ] = useState('');
 
@@ -17,8 +17,9 @@ function Login() {
         console.log("Checking user state changes", userState);
         if (userState.data) {
           userContextDispatch( { type: "LOGGED_IN", payload: userState.data });
-        } else {
-          userContextDispatch( { type: "LOGGED_OUT" });
+        }
+        if (userState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: userState.errorMessage });
         }
     }, [userState, userContextDispatch]);
 
@@ -40,33 +41,19 @@ function Login() {
         if (password.trim() === '') {
             err.push('Please enter your password');
         }
-        setErrors(err);
         if (err.length === 0) {
+            userContextDispatch( { type: "ALERT_MESSAGE", payload: "Logging In" } );
             LogIn(userName, password, userDispatch);
+        } else {
+            userContextDispatch( { type: "ALERT_ERROR", payload: err.map((error, index) => 
+                <div key={index}>{error}</div>
+            ) } );
         }
     }
 
     return <div>
         <Container>
             <h2>Please Log In</h2>
-
-            {userState.isLoading &&
-                <div className="alert alert-warning" role="alert">
-                    Loading...
-                </div>
-            }
-
-            {userState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {userState.errorMessage}
-                </div>
-            }
-
-            {errors.map((error, index) =>
-                <div key={index} className="alert alert-danger" role="alert">
-                    {error}
-                </div>
-            )}
 
             <Form onSubmit={handleSubmit}>
                 <FormGroup>

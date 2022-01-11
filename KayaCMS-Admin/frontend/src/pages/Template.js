@@ -1,5 +1,7 @@
 import React, { useReducer, useContext, useEffect } from 'react';
+import { Button } from 'reactstrap';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
+import Modal from "react-bootstrap/Modal";
 
 import { UserContext } from '../context/UserContext'
 
@@ -39,6 +41,11 @@ function Template() {
     } else {
       userContextDispatch( { type: "LOGGED_OUT" });
     }
+    if (userState.isError) {
+      userContextDispatch( { type: "ALERT_ERROR", payload: userState.errorMessage });
+    } else if (userState.isLoading) {
+      userContextDispatch( { type: "CHECKING_LOGGED_IN" });
+    }
   }, [userState]);
 
   return (
@@ -46,17 +53,19 @@ function Template() {
       <Router>
         <AppNavbar/>
 
-        {userState.isLoading &&
-          <div className="alert alert-warning" role="alert">
-            Loading...
-          </div>
-        }
+        <Modal show={userContext.statusMessage}>
+          <Modal.Header role="alert" className="alert alert-warning" variant="warning">Status</Modal.Header>
+          <Modal.Body>{userContext.statusMessage}</Modal.Body>
+          <Modal.Footer><Button size="sm" color="secondary"
+              onClick={() => userContextDispatch( { type: "ALERT_CLOSE" })}>Close</Button></Modal.Footer>
+        </Modal>
 
-        {userState.isError &&
-          <div className="alert alert-danger" role="alert">
-            {userState.errorMessage}
-          </div>
-        }
+        <Modal show={userContext.errorMessage}>
+          <Modal.Header role="alert" className="alert alert-danger">Error</Modal.Header>
+          <Modal.Body>{userContext.errorMessage}</Modal.Body>
+          <Modal.Footer><Button size="sm" color="secondary"
+              onClick={() => userContextDispatch( { type: "ALERT_CLOSE" })}>Close</Button></Modal.Footer>
+        </Modal>
 
         <Routes>
           <Route path={`/`} exact={true} element={<Home />}></Route>
