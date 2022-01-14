@@ -1,6 +1,7 @@
 package com.aranya.kayacms.filter;
 
 import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.exception.KayaServiceException;
 import com.aranya.kayacms.service.AdminUserService;
 import com.aranya.kayacms.service.WebPageService;
@@ -52,8 +53,9 @@ public class WebSiteFilter implements Filter {
         }
       } else {
         // Make sure it isn't actually set up and the web site just didn't get updated properly.
+        WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
         if (!webSite.getSetUpComplete()
-            && adminUserService.isAdminUserSetUp(webSite)
+            && adminUserService.isAdminUserSetUp(webSiteId)
             && webPageTemplateService.isWebPageTemplateSetUp(webSite)
             && webPageService.isWebPageSetUp(webSite)) {
           webSite = WebSite.builderClone(webSite).setUpComplete(true).build();

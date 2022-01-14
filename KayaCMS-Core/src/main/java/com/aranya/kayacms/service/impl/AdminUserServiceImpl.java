@@ -1,36 +1,28 @@
 package com.aranya.kayacms.service.impl;
 
 import com.aranya.kayacms.beans.adminuser.AdminUser;
+import com.aranya.kayacms.beans.adminuser.AdminUserId;
 import com.aranya.kayacms.beans.adminuser.AdminUserSearchCriteria;
-import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
+import com.aranya.kayacms.dao.AdminUserDAO;
 import com.aranya.kayacms.exception.KayaServiceException;
-import com.aranya.kayacms.repository.AdminUserRepository;
+import com.aranya.kayacms.properties.DayAndTime;
 import com.aranya.kayacms.service.AdminUserService;
-import com.aranya.kayacms.util.ListSearchResults;
 import com.aranya.kayacms.util.SearchResults;
-import java.time.Instant;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
 
-  private final AdminUserRepository adminUserRepository;
+  private final AdminUserDAO adminUserDAO;
 
   @Override
-  public boolean isAdminUserSetUp(WebSite webSite) throws KayaServiceException {
+  public boolean isAdminUserSetUp(WebSiteId webSiteId) throws KayaServiceException {
     try {
-      AdminUser adminUser = AdminUser.builder().webSite(webSite).build();
-      Example<AdminUser> example = Example.of(adminUser);
-      long count = adminUserRepository.count(example);
+      AdminUserSearchCriteria criteria = new AdminUserSearchCriteria(1, 1, true, webSiteId);
+      long count = adminUserDAO.searchAdminUser(criteria).getTotalItems();
       return count > 0;
     } catch (Exception e) {
       throw new KayaServiceException(e);
@@ -41,53 +33,26 @@ public class AdminUserServiceImpl implements AdminUserService {
   public SearchResults<AdminUser> searchAdminUser(AdminUserSearchCriteria criteria)
       throws KayaServiceException {
     try {
-      Sort sort = Sort.by("userName");
-      Pageable pageable = PageRequest.of(criteria.getPage() - 1, criteria.getItemsPerPage(), sort);
-
-      AdminUser adminUser = AdminUser.builder().webSite(criteria.getWebSite()).build();
-      Example<AdminUser> example = Example.of(adminUser);
-
-      Page<AdminUser> results = adminUserRepository.findAll(example, pageable);
-
-      return new ListSearchResults<AdminUser>(
-          results.getContent(),
-          criteria.getPage(),
-          criteria.getItemsPerPage(),
-          results.getTotalPages());
+      return adminUserDAO.searchAdminUser(criteria);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
   }
 
   @Override
-  public AdminUser getAdminUser(WebSite webSite, String userName, String password)
+  public AdminUser getAdminUser(WebSiteId webSiteId, String userName, String password)
       throws KayaServiceException {
     try {
-      AdminUser adminUser =
-          AdminUser.builder().userName(userName).password(password).webSite(webSite).build();
-
-      Example<AdminUser> example = Example.of(adminUser, ExampleMatcher.matchingAll());
-
-      Optional<AdminUser> optional = adminUserRepository.findOne(example);
-      if (optional.isPresent()) {
-        return optional.get();
-      } else {
-        return null;
-      }
+      return adminUserDAO.getAdminUser(webSiteId, userName, password);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
   }
 
   @Override
-  public AdminUser getAdminUser(Long adminUserId) throws KayaServiceException {
+  public AdminUser getAdminUser(AdminUserId adminUserId) throws KayaServiceException {
     try {
-      Optional<AdminUser> optional = adminUserRepository.findById(adminUserId);
-      if (optional.isPresent()) {
-        return optional.get();
-      } else {
-        return null;
-      }
+      return adminUserDAO.getAdminUser(adminUserId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
@@ -99,43 +64,34 @@ public class AdminUserServiceImpl implements AdminUserService {
       AdminUser newAdminUser =
           AdminUser.builderClone(adminUser)
               .adminUserId(null)
-              .createDate(Instant.now())
-              .modifyDate(Instant.now())
+              .createDate(new DayAndTime())
+              .modifyDate(new DayAndTime())
               .build();
-
-      adminUser = adminUserRepository.save(newAdminUser);
-
-      return adminUser;
+      AdminUserId adminUserId = adminUserDAO.insertAdminUser(newAdminUser);
+      return adminUserDAO.getAdminUser(adminUserId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
   }
 
   @Override
-  public AdminUser updateAdminUser(AdminUser entity) throws KayaServiceException {
+  public AdminUser updateAdminUser(AdminUser adminUser) throws KayaServiceException {
     try {
-      if (entity.getAdminUserId() == null) {
+      if (adminUser.getAdminUserId() == null) {
         throw new KayaServiceException("Admin user ID not set.");
       } else {
-        Optional<AdminUser> adminUser = adminUserRepository.findById(entity.getAdminUserId());
-
-        if (adminUser.isPresent()) {
-          AdminUser newEntity =
-              AdminUser.builderClone(adminUser.get())
-                  .firstName(entity.getFirstName())
-                  .lastName(entity.getLastName())
-                  .email(entity.getEmail())
-                  .userName(entity.getUserName())
-                  .password(entity.getPassword())
-                  .modifyDate(Instant.now())
-                  .build();
-
-          newEntity = adminUserRepository.save(newEntity);
-
-          return newEntity;
-        } else {
-          throw new KayaServiceException("Admin user with given ID does not exist!");
-        }
+        AdminUserId adminUserId = adminUser.getAdminUserId();
+        AdminUser newAdminUser =
+            AdminUser.builderClone(adminUserDAO.getAdminUser(adminUserId))
+                .firstName(adminUser.getFirstName())
+                .lastName(adminUser.getLastName())
+                .email(adminUser.getEmail())
+                .userName(adminUser.getUserName())
+                .password(adminUser.getPassword())
+                .modifyDate(new DayAndTime())
+                .build();
+        adminUserDAO.updateAdminUser(newAdminUser);
+        return adminUserDAO.getAdminUser(newAdminUser.getAdminUserId());
       }
     } catch (Exception e) {
       throw new KayaServiceException(e);
@@ -143,15 +99,12 @@ public class AdminUserServiceImpl implements AdminUserService {
   }
 
   @Override
-  public void deleteAdminUser(Long adminUserId) throws KayaServiceException {
+  public void deleteAdminUser(AdminUserId adminUserId) throws KayaServiceException {
     try {
-      Optional<AdminUser> adminUser = adminUserRepository.findById(adminUserId);
-
-      if (adminUser.isPresent()) {
-        adminUserRepository.deleteById(adminUserId);
-      } else {
+      if (adminUserDAO.getAdminUser(adminUserId) == null) {
         throw new KayaServiceException("Admin user with given ID does not exist!");
       }
+      adminUserDAO.deleteAdminUser(adminUserId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }

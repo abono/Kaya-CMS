@@ -1,12 +1,43 @@
 package com.aranya.kayacms.service.impl;
 
+import com.aranya.kayacms.beans.media.Media;
+import com.aranya.kayacms.beans.webpage.WebPage;
+import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplate;
+import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.repository.MediaRepository;
+import com.aranya.kayacms.repository.WebPageRepository;
+import com.aranya.kayacms.repository.WebPageTemplateRepository;
 import com.aranya.kayacms.service.PublisherService;
+import java.util.List;
+import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class PublisherServiceImpl implements PublisherService {
+
+  private WebPageTemplateRepository webPageTemplateRepository;
+
+  private WebPageRepository webPageRepository;
+
+  private MediaRepository mediaRepository;
+
+  @Override
+  public List<WebPageTemplate> getUnpublishedWebPageTemplate(WebSite webSite) {
+    return webPageTemplateRepository.findByWebSite(webSite);
+  }
+
+  @Override
+  public List<WebPage> getUnpublishedWebPage(WebSite webSite) {
+    return webPageRepository.findByWebSite(webSite);
+  }
+
+  @Override
+  public List<Media> getUnpublishedMedia(WebSite webSite) {
+    return mediaRepository.findByWebSite(webSite);
+  }
 
   // When publishing:
   // * Web Page Templates

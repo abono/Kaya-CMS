@@ -2,11 +2,12 @@ package com.aranya.kayacms.controller.setup;
 
 import com.aranya.kayacms.beans.adminuser.AdminUser;
 import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.controller.BaseController;
 import com.aranya.kayacms.exception.KayaServiceException;
+import com.aranya.kayacms.properties.DayAndTime;
 import com.aranya.kayacms.service.AdminUserService;
 import com.aranya.kayacms.util.RequestUtil;
-import java.time.Instant;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,7 +26,8 @@ public class AdminUserSetUpController extends BaseController {
   public @ResponseBody boolean adminUserExists(HttpServletRequest request)
       throws KayaServiceException {
     WebSite webSite = RequestUtil.getWebSite(request);
-    return adminUserService.isAdminUserSetUp(webSite);
+    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    return adminUserService.isAdminUserSetUp(webSiteId);
   }
 
   @RequestMapping(value = "/create", method = RequestMethod.POST)
@@ -36,13 +38,14 @@ public class AdminUserSetUpController extends BaseController {
     }
 
     WebSite webSite = RequestUtil.getWebSite(request);
+    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
 
     AdminUser newAdminUser =
         AdminUser.builderClone(adminUser)
             .adminUserId(null)
-            .createDate(Instant.now())
-            .modifyDate(Instant.now())
-            .webSite(webSite)
+            .createDate(new DayAndTime())
+            .modifyDate(new DayAndTime())
+            .webSiteId(webSiteId)
             .build();
 
     adminUserService.createAdminUser(newAdminUser);

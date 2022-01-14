@@ -307,12 +307,12 @@ public class DayAndTime implements Serializable, Comparable<DayAndTime> {
 
   public String toString(String indent) {
     SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-    return indent + formatter.format(cal);
+    return indent + formatter.format(cal.getTime());
   }
 
   public String getFormattedString(String format) {
     SimpleDateFormat formatter = new SimpleDateFormat(format);
-    return formatter.format(cal);
+    return formatter.format(cal.getTime());
   }
 
   @Override

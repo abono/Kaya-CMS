@@ -2,6 +2,7 @@ package com.aranya.kayacms.controller.admin.login;
 
 import com.aranya.kayacms.beans.adminuser.AdminUser;
 import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.controller.BaseController;
 import com.aranya.kayacms.controller.admin.util.AdminSessionUtil;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
@@ -36,10 +37,11 @@ public class LogInController extends BaseController {
       throws KayaServiceException, KayaAccessDeniedException {
 
     WebSite webSite = RequestUtil.getWebSite(request);
+    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
 
     String userName = logInRequest.getUserName();
     String password = logInRequest.getPassword();
-    AdminUser adminUser = adminUserService.getAdminUser(webSite, userName, password);
+    AdminUser adminUser = adminUserService.getAdminUser(webSiteId, userName, password);
     if (adminUser == null) {
       throw new KayaAccessDeniedException("Invalid user name or password");
     } else {

@@ -1,72 +1,34 @@
 package com.aranya.kayacms.beans.adminuser;
 
-import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
+import com.aranya.kayacms.properties.DayAndTime;
 import java.io.Serializable;
-import java.time.Instant;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
-@Entity
-@Table(
-    name = "ADMIN_USER",
-    uniqueConstraints = {
-      @UniqueConstraint(columnNames = {"EMAIL", "WEB_SITE_ID"}),
-      @UniqueConstraint(columnNames = {"USER_NAME", "WEB_SITE_ID"})
-    })
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Builder
 public class AdminUser implements Serializable {
 
   private static final long serialVersionUID = 3994691643854298478L;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "ADMIN_USER_ID")
-  private Long adminUserId;
+  private AdminUserId adminUserId;
 
-  @Column(name = "FIRST_NAME", nullable = false, length = 100)
   private String firstName;
 
-  @Column(name = "LAST_NAME", nullable = false, length = 100)
   private String lastName;
 
-  @Column(name = "EMAIL", nullable = false, length = 255)
   private String email;
 
-  @Column(name = "USER_NAME", nullable = false, length = 100)
   private String userName;
 
-  @Column(name = "PASSWORD", nullable = false, columnDefinition = "TEXT")
   private String password;
 
-  @Column(name = "CREATE_DATE", nullable = false)
-  private Instant createDate;
+  private DayAndTime createDate;
 
-  @Column(name = "MODIFY_DATE", nullable = false)
-  private Instant modifyDate;
+  private DayAndTime modifyDate;
 
-  @ManyToOne
-  @JoinColumn(name = "WEB_SITE_ID")
-  private WebSite webSite;
+  private WebSiteId webSiteId;
 
   public static AdminUser.AdminUserBuilder builderClone(AdminUser adminUser) {
     return AdminUser.builder()
@@ -78,6 +40,6 @@ public class AdminUser implements Serializable {
         .password(adminUser.getPassword())
         .createDate(adminUser.getCreateDate())
         .modifyDate(adminUser.getModifyDate())
-        .webSite(adminUser.getWebSite());
+        .webSiteId(adminUser.getWebSiteId());
   }
 }
