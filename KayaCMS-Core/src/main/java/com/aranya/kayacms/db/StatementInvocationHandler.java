@@ -96,7 +96,7 @@ public class StatementInvocationHandler implements InvocationHandler {
 
   private Throwable handleInvocationTargetException(InvocationTargetException e, String sql) {
     Throwable t = e.getTargetException();
-    if ((t instanceof SQLException) && (!(t instanceof DetailedSQLException))) {
+    if (t instanceof SQLException && !(t instanceof DetailedSQLException)) {
       t = new DetailedSQLException((SQLException) t, sql);
     }
     if (log.isWarnEnabled()) {

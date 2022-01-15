@@ -124,7 +124,7 @@ public class PooledDelegatingDataSource extends DelegatingDataSource {
       try {
         if ("equals".equals(methodName)) {
           // Only consider equal when proxies are identical.
-          return (proxy == args[0]);
+          return proxy == args[0];
         } else if ("hashCode".equals(methodName)) {
           // Use hashCode of Connection proxy.
           return System.identityHashCode(proxy);

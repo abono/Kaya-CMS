@@ -35,7 +35,7 @@ public class SearchExtractor<T> implements ResultSetExtractor<SearchResults<T>> 
     }
 
     int page = criteria.getPage();
-    int pageCount = (index / itemsPerPage) + (index % itemsPerPage != 0 ? 1 : 0);
+    int pageCount = index / itemsPerPage + (index % itemsPerPage != 0 ? 1 : 0);
     return new ListSearchResults<T>(adminUserList, page, itemsPerPage, pageCount, index);
   }
 }

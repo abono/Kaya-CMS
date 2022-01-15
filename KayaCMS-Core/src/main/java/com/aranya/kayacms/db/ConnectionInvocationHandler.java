@@ -93,7 +93,7 @@ public class ConnectionInvocationHandler implements InvocationHandler {
       return invoke(method, args);
     } catch (InvocationTargetException e) {
       Throwable t = e.getTargetException();
-      if ((t instanceof SQLException) && (!(t instanceof DetailedSQLException))) {
+      if (t instanceof SQLException && !(t instanceof DetailedSQLException)) {
         t = new DetailedSQLException((SQLException) t, null);
       }
       if (log.isWarnEnabled()) {

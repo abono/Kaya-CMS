@@ -5,11 +5,9 @@ import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-@RequiredArgsConstructor
 public abstract class AbstractDAO {
 
   private final Map<String, String> sqlCache = new HashMap<>();
@@ -17,6 +15,11 @@ public abstract class AbstractDAO {
   protected final NamedParameterJdbcTemplate jdbcTemplate;
 
   private final String name;
+
+  public AbstractDAO(NamedParameterJdbcTemplate jdbcTemplate, String name) {
+    this.jdbcTemplate = jdbcTemplate;
+    this.name = name;
+  }
 
   protected String getSQL(String fileName) throws SQLException {
     String sql = sqlCache.get(fileName);

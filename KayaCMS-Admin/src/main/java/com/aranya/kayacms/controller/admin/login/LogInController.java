@@ -10,7 +10,6 @@ import com.aranya.kayacms.exception.KayaServiceException;
 import com.aranya.kayacms.service.AdminUserService;
 import com.aranya.kayacms.util.RequestUtil;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,8 +45,14 @@ public class LogInController extends BaseController {
       throw new KayaAccessDeniedException("Invalid user name or password");
     } else {
       try {
-        LogInResponse logIn = new LogInResponse();
-        BeanUtils.copyProperties(logIn, adminUser);
+        LogInResponse logIn =
+            LogInResponse.builder()
+                .adminUserId(adminUser.getAdminUserId().getId())
+                .firstName(adminUser.getFirstName())
+                .lastName(adminUser.getLastName())
+                .email(adminUser.getEmail())
+                .userName(adminUser.getUserName())
+                .build();
         AdminSessionUtil.setAdminUser(request, logIn);
         return logIn;
       } catch (Exception e) {

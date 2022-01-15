@@ -81,26 +81,25 @@ public class PublishController extends BaseAdminController {
 
     WebSite webSite = RequestUtil.getWebSite(request);
 
-    PublishResponse response = new PublishResponse();
-
     List<WebPageTemplateSummary> webPageTemplateSummaries =
         publisherService.getUnpublishedWebPageTemplate(webSite).stream()
             .map(item -> convertItem(item))
             .collect(Collectors.toList());
-    response.setWebPageTemplates(webPageTemplateSummaries);
 
     List<WebPageSummary> webPageSummaries =
         publisherService.getUnpublishedWebPage(webSite).stream()
             .map(item -> convertItem(item))
             .collect(Collectors.toList());
-    response.setWebPages(webPageSummaries);
 
     List<MediaSummary> mediaSummaries =
         publisherService.getUnpublishedMedia(webSite).stream()
             .map(item -> convertItem(item))
             .collect(Collectors.toList());
-    response.setMedia(mediaSummaries);
 
-    return response;
+    return PublishResponse.builder()
+        .webPageTemplates(webPageTemplateSummaries)
+        .webPages(webPageSummaries)
+        .media(mediaSummaries)
+        .build();
   }
 }

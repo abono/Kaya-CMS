@@ -3,10 +3,16 @@ package com.aranya.kayacms.beans.adminuser;
 import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.properties.DayAndTime;
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 @Builder
 public class AdminUser implements Serializable {
 

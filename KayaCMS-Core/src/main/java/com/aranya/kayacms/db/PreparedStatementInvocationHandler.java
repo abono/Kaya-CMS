@@ -234,23 +234,23 @@ public class PreparedStatementInvocationHandler implements InvocationHandler {
 
   private void checkIfSetterAndProcess(Method method, Object... args) {
     String methodName = method.getName();
-    if ((args != null)
-        && (args.length > 0)
-        && (args[0] instanceof Number)
+    if (args != null
+        && args.length > 0
+        && args[0] instanceof Number
         && "setNull".equals(methodName)) {
       values[((Number) args[0]).intValue() - 1] = null;
-    } else if ((args != null) && (args.length >= 2) && methodName.startsWith("set")) {
+    } else if (args != null && args.length >= 2 && methodName.startsWith("set")) {
       processSetter(methodName, args);
     }
   }
 
   void logQuery(Method method, Object... args) {
     // Do not bother logging if debug is not enabled or if this is a PING request.
-    if (sqlLogger.isDebugEnabled() && (!StringUtils.equalsIgnoreCase("select 1 from dual", sql))) {
+    if (sqlLogger.isDebugEnabled() && !StringUtils.equalsIgnoreCase("select 1 from dual", sql)) {
       String executedSQL = getExecutedSQL(method, args);
       if (StringUtils.isNotBlank(executedSQL)) {
         String sqlWithValues = getSQLWithValues(method, args, executedSQL);
-        if ((args == null) || (args.length == 0)) {
+        if (args == null || args.length == 0) {
           executedSQL = sql;
         } else {
           executedSQL = (String) args[0];
@@ -274,7 +274,7 @@ public class PreparedStatementInvocationHandler implements InvocationHandler {
   String getExecutedSQL(Method method, Object... args) {
     String executedSQL = null;
     if (shouldLog(method.getName())) {
-      if ((args == null) || (args.length == 0)) {
+      if (args == null || args.length == 0) {
         executedSQL = sql;
       } else {
         executedSQL = (String) args[0];
@@ -302,7 +302,7 @@ public class PreparedStatementInvocationHandler implements InvocationHandler {
   String getSQLWithValues(Method method, Object[] args, String executedSQL) {
     String sqlWithValues = null;
     if (StringUtils.isNotBlank(executedSQL) && shouldLog(method.getName())) {
-      if ((args == null) || (args.length == 0)) {
+      if (args == null || args.length == 0) {
         sqlWithValues = getSQLWithValues();
       } else {
         sqlWithValues = executedSQL;
@@ -317,7 +317,7 @@ public class PreparedStatementInvocationHandler implements InvocationHandler {
   private Throwable handleInvocationTargetException(
       InvocationTargetException e, Method method, Object... args) {
     Throwable t = e.getTargetException();
-    if ((t instanceof SQLException) && (!(t instanceof DetailedSQLException))) {
+    if (t instanceof SQLException && !(t instanceof DetailedSQLException)) {
       String executedSQL = getExecutedSQL(method, args);
       String sqlWithValues = getSQLWithValues(method, args, executedSQL);
       t = new DetailedSQLException((SQLException) t, executedSQL, sqlWithValues);

@@ -11,6 +11,18 @@
 
 <FindBugsFilter>
 
+  <!-- =============================================================================================
+    In order to do proper dependency injection so Spring auto wires objects together on startup, we
+    need the various beans to contain other beans (DAO's hold the JDBC Template, Services contain
+    the DAOs, Controllers hold the service objects, etc.).  Spot Bugs really hates this and flags
+    errors in these objects with the EI_EXPOSE_REP2 bug.  For this reason we are just going to turn
+    this bug off globally.
+  ============================================================================================== -->
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+    <Class name="~com\.aranya\.kayacms\..*"/>
+  </Match>
+
   <!-- For example see https://github.com/undertow-io/undertow/blob/master/spotbugs-exclude.xml -->
   <!-- =============================================================================================
     Spot Bugs wants immutable beans all over the place to ensure that objects are not modified
@@ -21,21 +33,8 @@
   <Match>
     <Or>
       <Bug pattern="EI_EXPOSE_REP"/>
-      <Bug pattern="EI_EXPOSE_REP2"/>
     </Or>
     <Class name="~com\.aranya\.kayacms\.beans\..*"/>
   </Match>
   
-  <!-- =============================================================================================
-    For some reason Spot Bugs is complaining about the service object instance variables which are
-    necessary to process requests.  We will turn this off until we find a way to deal with it
-    without having to add the exception.
-  ============================================================================================== -->
-  <Match>
-    <Or>
-      <Bug pattern="EI_EXPOSE_REP2"/>
-    </Or>
-    <Class name="~com\.aranya\.kayacms\.controller\.admin\..*Controller"/>
-  </Match>
-
 </FindBugsFilter>
