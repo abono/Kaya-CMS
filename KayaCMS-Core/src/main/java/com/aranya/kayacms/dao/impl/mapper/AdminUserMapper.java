@@ -3,12 +3,10 @@ package com.aranya.kayacms.dao.impl.mapper;
 import com.aranya.kayacms.beans.adminuser.AdminUser;
 import com.aranya.kayacms.beans.adminuser.AdminUserId;
 import com.aranya.kayacms.beans.website.WebSiteId;
-import com.aranya.kayacms.properties.DayAndTime;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.springframework.jdbc.core.RowMapper;
 
-public class AdminUserMapper implements RowMapper<AdminUser> {
+public class AdminUserMapper extends AbstractRowMaster<AdminUser> {
 
   @Override
   public AdminUser mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -19,8 +17,8 @@ public class AdminUserMapper implements RowMapper<AdminUser> {
         .email(rs.getString("email"))
         .userName(rs.getString("user_name"))
         .password(rs.getString("password"))
-        .createDate(new DayAndTime(rs.getTimestamp("create_date").getTime()))
-        .modifyDate(new DayAndTime(rs.getTimestamp("modify_date").getTime()))
+        .createDate(extractDayAndTime(rs, "create_date"))
+        .modifyDate(extractDayAndTime(rs, "modify_date"))
         .webSiteId(new WebSiteId(rs.getLong("web_site_id")))
         .build();
   }

@@ -4,9 +4,13 @@ import com.aranya.kayacms.beans.media.Media;
 import com.aranya.kayacms.beans.webpage.WebPage;
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplate;
 import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.controller.admin.BaseAdminController;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
+import com.aranya.kayacms.exception.KayaServiceException;
 import com.aranya.kayacms.service.PublisherService;
+import com.aranya.kayacms.service.WebPageService;
+import com.aranya.kayacms.service.WebPageTemplateService;
 import com.aranya.kayacms.util.RequestUtil;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,17 +26,21 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class PublishController extends BaseAdminController {
 
+  private final WebPageTemplateService webPageTemplateService;
+
+  private final WebPageService webPageService;
+
   private final PublisherService publisherService;
 
   private WebPageTemplateSummary convertItem(WebPageTemplate item) {
     WebPageTemplateSummary summary = new WebPageTemplateSummary();
 
-    summary.setWebPageTemplateId(item.getWebPageTemplateId());
+    summary.setWebPageTemplateId(item.getWebPageTemplateId().getId());
     summary.setName(item.getName());
     summary.setNameEdits(item.getNameEdits());
-    summary.setCreateDate(item.getCreateDate());
-    summary.setModifyDate(item.getModifyDate());
-    summary.setPublishDate(item.getPublishDate());
+    summary.setCreateDate(item.getCreateDate().getDate());
+    summary.setModifyDate(item.getModifyDate().getDate());
+    summary.setPublishDate(item.getPublishDate().getDate());
 
     return summary;
   }
@@ -40,7 +48,7 @@ public class PublishController extends BaseAdminController {
   private WebPageSummary convertItem(WebPage item) {
     WebPageSummary summary = new WebPageSummary();
 
-    summary.setWebPageId(item.getWebPageId());
+    summary.setWebPageId(item.getWebPageId().getId());
     summary.setType(item.getType());
     summary.setPath(item.getPath());
     summary.setTitle(item.getTitle());
@@ -49,11 +57,11 @@ public class PublishController extends BaseAdminController {
     summary.setPathEdits(item.getPathEdits());
     summary.setTitleEdits(item.getTitleEdits());
     summary.setDescriptionEdits(item.getDescriptionEdits());
-    summary.setCreateDate(item.getCreateDate());
-    summary.setModifyDate(item.getModifyDate());
-    summary.setPublishDate(item.getPublishDate());
-    summary.setWebPageTemplateId(item.getWebPageTemplate().getWebPageTemplateId());
-    summary.setWebPageTemplateIdEdits(item.getWebPageTemplateEdits().getWebPageTemplateId());
+    summary.setCreateDate(item.getCreateDate().getDate());
+    summary.setModifyDate(item.getModifyDate().getDate());
+    summary.setPublishDate(item.getPublishDate().getDate());
+    summary.setWebPageTemplateId(item.getWebPageTemplateId().getId());
+    summary.setWebPageTemplateIdEdits(item.getWebPageTemplateIdEdits().getId());
 
     return summary;
   }
@@ -75,19 +83,20 @@ public class PublishController extends BaseAdminController {
 
   @GetMapping
   public @ResponseBody PublishResponse getUnpublishedSummaries(HttpServletRequest request)
-      throws KayaAccessDeniedException {
+      throws KayaAccessDeniedException, KayaServiceException {
 
     verifyLoggedIn(request);
 
     WebSite webSite = RequestUtil.getWebSite(request);
+    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
 
     List<WebPageTemplateSummary> webPageTemplateSummaries =
-        publisherService.getUnpublishedWebPageTemplate(webSite).stream()
+        webPageTemplateService.getUnpublishedWebPageTemplate(webSiteId).stream()
             .map(item -> convertItem(item))
             .collect(Collectors.toList());
 
     List<WebPageSummary> webPageSummaries =
-        publisherService.getUnpublishedWebPage(webSite).stream()
+        webPageService.getUnpublishedWebPage(webSiteId).stream()
             .map(item -> convertItem(item))
             .collect(Collectors.toList());
 

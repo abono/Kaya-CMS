@@ -126,7 +126,6 @@ public class AdminUserDAOImpl extends AbstractDAO implements AdminUserDAO {
     paramMap.put("email", adminUser.getEmail());
     paramMap.put("userName", adminUser.getUserName());
     paramMap.put("password", adminUser.getPassword());
-    paramMap.put("webSiteId", adminUser.getWebSiteId().getId());
 
     String sql = getSQL("update.sql");
 

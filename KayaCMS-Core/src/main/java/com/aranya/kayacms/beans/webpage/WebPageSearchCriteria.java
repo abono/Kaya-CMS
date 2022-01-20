@@ -1,6 +1,6 @@
 package com.aranya.kayacms.beans.webpage;
 
-import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.util.AbstractSearchCriteria;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,18 +11,18 @@ import lombok.ToString;
 @ToString
 public class WebPageSearchCriteria extends AbstractSearchCriteria {
 
-  private static final long serialVersionUID = -8693721091351820792L;
+  private static final long serialVersionUID = 3878171034694693181L;
 
-  private final WebSite webSite;
+  private final WebSiteId webSiteId;
 
   public WebPageSearchCriteria(int itemsPerPage, int page, boolean inactiveIncluded) {
     super(itemsPerPage, page, inactiveIncluded);
-    this.webSite = null;
+    this.webSiteId = null;
   }
 
   public WebPageSearchCriteria(
-      int itemsPerPage, int page, boolean inactiveIncluded, WebSite webSite) {
+      int itemsPerPage, int page, boolean inactiveIncluded, WebSiteId webSiteId) {
     super(itemsPerPage, page, inactiveIncluded);
-    this.webSite = webSite;
+    this.webSiteId = webSiteId;
   }
 }

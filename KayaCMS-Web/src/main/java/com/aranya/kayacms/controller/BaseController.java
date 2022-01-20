@@ -1,5 +1,6 @@
 package com.aranya.kayacms.controller;
 
+import com.aranya.kayacms.db.DetailedSQLException;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
 import com.aranya.kayacms.exception.KayaResourceNotFoundException;
 import com.aranya.kayacms.exception.KayaServiceException;
@@ -23,6 +24,18 @@ public class BaseController {
       return t;
     } else {
       return getRootCause(cause);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <T extends Throwable> T getCause(Throwable t, Class<T> clazz) {
+    Throwable cause = t.getCause();
+    if (cause == null) {
+      return null;
+    } else if (clazz.isAssignableFrom(cause.getClass())) {
+      return (T) cause;
+    } else {
+      return getCause(cause, clazz);
     }
   }
 
@@ -104,7 +117,16 @@ public class BaseController {
     message.put("type", e.getClass().getSimpleName());
     message.put("exceptionCode", e.getExceptionCode());
     message.put("exceptionArgs", buildExceptionArguments(e, e.getExceptionArgs()));
-    message.put("message", e.getMessage());
+
+    // Hide the actual exception message from the UI as it could contain sensitive database
+    // information.
+    DetailedSQLException sqlException = getCause(e, DetailedSQLException.class);
+    if (sqlException != null) {
+      log.debug("Reducing exception before presenting to user front end", e);
+      message.put("message", "Unexpected data source error");
+    } else {
+      message.put("message", e.getMessage());
+    }
 
     return message;
   }
@@ -223,7 +245,16 @@ public class BaseController {
     message.put("type", e.getClass().getSimpleName());
     message.put("exceptionCode", ServletException.class.getName());
     message.put("exceptionArgs", buildExceptionArguments(e));
-    message.put("message", e.getClass().getSimpleName() + ": " + e.getMessage());
+
+    // Hide the actual exception message from the UI as it could contain sensitive database
+    // information.
+    DetailedSQLException sqlException = getCause(e, DetailedSQLException.class);
+    if (sqlException != null) {
+      log.debug("Reducing exception before presenting to user front end", e);
+      message.put("message", "Unexpected data source error");
+    } else {
+      message.put("message", e.getMessage());
+    }
 
     return message;
   }

@@ -6,7 +6,6 @@ import com.aranya.kayacms.beans.adminuser.AdminUserSearchCriteria;
 import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.dao.AdminUserDAO;
 import com.aranya.kayacms.exception.KayaServiceException;
-import com.aranya.kayacms.properties.DayAndTime;
 import com.aranya.kayacms.service.AdminUserService;
 import com.aranya.kayacms.util.SearchResults;
 import lombok.AllArgsConstructor;
@@ -61,13 +60,7 @@ public class AdminUserServiceImpl implements AdminUserService {
   @Override
   public AdminUser createAdminUser(AdminUser adminUser) throws KayaServiceException {
     try {
-      AdminUser newAdminUser =
-          AdminUser.builderClone(adminUser)
-              .adminUserId(null)
-              .createDate(new DayAndTime())
-              .modifyDate(new DayAndTime())
-              .build();
-      AdminUserId adminUserId = adminUserDAO.insertAdminUser(newAdminUser);
+      AdminUserId adminUserId = adminUserDAO.insertAdminUser(adminUser);
       return adminUserDAO.getAdminUser(adminUserId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
@@ -80,18 +73,8 @@ public class AdminUserServiceImpl implements AdminUserService {
       if (adminUser.getAdminUserId() == null) {
         throw new KayaServiceException("Admin user ID not set.");
       } else {
-        AdminUserId adminUserId = adminUser.getAdminUserId();
-        AdminUser newAdminUser =
-            AdminUser.builderClone(adminUserDAO.getAdminUser(adminUserId))
-                .firstName(adminUser.getFirstName())
-                .lastName(adminUser.getLastName())
-                .email(adminUser.getEmail())
-                .userName(adminUser.getUserName())
-                .password(adminUser.getPassword())
-                .modifyDate(new DayAndTime())
-                .build();
-        adminUserDAO.updateAdminUser(newAdminUser);
-        return adminUserDAO.getAdminUser(newAdminUser.getAdminUserId());
+        adminUserDAO.updateAdminUser(adminUser);
+        return adminUserDAO.getAdminUser(adminUser.getAdminUserId());
       }
     } catch (Exception e) {
       throw new KayaServiceException(e);

@@ -5,6 +5,5 @@ set
   email = :email,
   user_name = :userName,
   password = :password,
-  modify_date = now(),
-  web_site_id = :webSiteId
+  modify_date = now()
 where admin_user_id = :adminUserId

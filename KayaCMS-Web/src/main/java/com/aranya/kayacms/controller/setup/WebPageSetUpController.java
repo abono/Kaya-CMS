@@ -4,13 +4,14 @@ import com.aranya.kayacms.beans.webpage.WebPage;
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplate;
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplateSearchCriteria;
 import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.exception.KayaServiceException;
+import com.aranya.kayacms.properties.DayAndTime;
 import com.aranya.kayacms.service.WebPageService;
 import com.aranya.kayacms.service.WebPageTemplateService;
 import com.aranya.kayacms.service.WebSiteService;
 import com.aranya.kayacms.util.RequestUtil;
 import com.aranya.kayacms.util.SearchResults;
-import java.time.Instant;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,7 +34,7 @@ public class WebPageSetUpController {
   public @ResponseBody boolean webPageExists(HttpServletRequest request)
       throws KayaServiceException {
     WebSite webSite = RequestUtil.getWebSite(request);
-    return webPageService.isWebPageSetUp(webSite);
+    return webPageService.isWebPageSetUp(new WebSiteId(webSite.getWebSiteId()));
   }
 
   @RequestMapping(value = "/create", method = RequestMethod.POST)
@@ -46,7 +47,7 @@ public class WebPageSetUpController {
     WebSite webSite = RequestUtil.getWebSite(request);
 
     WebPageTemplateSearchCriteria criteria =
-        new WebPageTemplateSearchCriteria(1, 1, false, webSite);
+        new WebPageTemplateSearchCriteria(1, 1, false, new WebSiteId(webSite.getWebSiteId()));
     SearchResults<WebPageTemplate> results =
         webPageTemplateService.searchWebPageTemplates(criteria);
     WebPageTemplate template = results.getItems().get(0);
@@ -63,12 +64,12 @@ public class WebPageSetUpController {
             .descriptionEdits("")
             .contentEdits("")
             .parametersEdits("")
-            .publishDate(Instant.now())
-            .createDate(Instant.now())
-            .modifyDate(Instant.now())
-            .webSite(webSite)
-            .webPageTemplate(template)
-            .webPageTemplateEdits(template)
+            .publishDate(new DayAndTime())
+            .createDate(new DayAndTime())
+            .modifyDate(new DayAndTime())
+            .webSiteId(new WebSiteId(webSite.getWebSiteId()))
+            .webPageTemplateId(template.getWebPageTemplateId())
+            .webPageTemplateIdEdits(template.getWebPageTemplateId())
             .build();
 
     webPageService.createWebPage(webPage);

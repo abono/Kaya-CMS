@@ -5,11 +5,13 @@ import com.aranya.kayacms.beans.redirect.Redirect;
 import com.aranya.kayacms.beans.webpage.WebPage;
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplate;
 import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.context.DateContext;
 import com.aranya.kayacms.exception.KayaServiceException;
 import com.aranya.kayacms.service.MediaService;
 import com.aranya.kayacms.service.RedirectService;
 import com.aranya.kayacms.service.WebPageService;
+import com.aranya.kayacms.service.WebPageTemplateService;
 import com.aranya.kayacms.util.RequestUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +40,8 @@ import org.springframework.stereotype.Component;
 @Order(2)
 @Slf4j
 public class WebPageFilter implements Filter {
+
+  @Autowired private WebPageTemplateService webPageTemplateService;
 
   @Autowired private MediaService mediaService;
 
@@ -128,7 +132,8 @@ public class WebPageFilter implements Filter {
 
     try {
       if (StringUtils.isBlank(extension) || extension.equals("htm") || extension.equals("html")) {
-        WebPage webPage = webPageService.getWebPage(webSite, path);
+        WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+        WebPage webPage = webPageService.getWebPage(webSiteId, path);
         if (webPage == null) {
           Redirect redirect = redirectService.getRedirect(webSite, path);
           if (redirect == null) {
@@ -161,8 +166,9 @@ public class WebPageFilter implements Filter {
   }
 
   private void serveWebPageContent(WebSite webSite, WebPage webPage, HttpServletResponse response)
-      throws IOException {
-    WebPageTemplate webPageTemplate = webPage.getWebPageTemplate();
+      throws IOException, KayaServiceException {
+    WebPageTemplate webPageTemplate =
+        webPageTemplateService.getWebPageTemplate(webPage.getWebPageTemplateId());
 
     VelocityEngine velocityEngine = new VelocityEngine();
     velocityEngine.init();

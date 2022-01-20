@@ -1,8 +1,10 @@
 package com.aranya.kayacms.controller.admin.webpage;
 
 import com.aranya.kayacms.beans.webpage.WebPage;
+import com.aranya.kayacms.beans.webpage.WebPageId;
 import com.aranya.kayacms.beans.webpage.WebPageSearchCriteria;
 import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.controller.admin.BaseAdminController;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
 import com.aranya.kayacms.exception.KayaResourceNotFoundException;
@@ -39,15 +41,15 @@ public class WebPageController extends BaseAdminController {
   private final WebPageService webPageService;
 
   private void populateBase(WebPage item, WebPageResponse response) {
-    response.setWebPageId(item.getWebPageId());
+    response.setWebPageId(item.getWebPageId().getId());
     response.setType(item.getType());
     response.setPath(item.getPath());
     response.setTitle(item.getTitle());
     response.setDescription(item.getDescription());
 
-    response.setCreateDate(item.getCreateDate());
-    response.setModifyDate(item.getCreateDate());
-    response.setPublishDate(item.getCreateDate());
+    response.setCreateDate(item.getCreateDate().getDate());
+    response.setModifyDate(item.getCreateDate().getDate());
+    response.setPublishDate(item.getCreateDate().getDate());
     response.setEdited(
         !StringUtils.isAllEmpty(item.getTypeEdits())
             || !StringUtils.isAllEmpty(item.getPathEdits())
@@ -93,7 +95,8 @@ public class WebPageController extends BaseAdminController {
 
     verifyLoggedIn(request);
 
-    WebPageSearchCriteria criteria = new WebPageSearchCriteria(itemsPerPage, page, false, webSite);
+    WebPageSearchCriteria criteria =
+        new WebPageSearchCriteria(itemsPerPage, page, false, new WebSiteId(webSite.getWebSiteId()));
     SearchResults<WebPage> searchResults = webPageService.searchWebPages(criteria);
     List<WebPageResponse> items =
         searchResults.getItems().stream()
@@ -109,7 +112,7 @@ public class WebPageController extends BaseAdminController {
 
     verifyLoggedIn(request);
 
-    WebPage webPage = webPageService.getWebPage(id);
+    WebPage webPage = webPageService.getWebPage(new WebPageId(id));
     if (webPage == null) {
       throw new KayaResourceNotFoundException(
           "Web page not found", "entity.not.found", Collections.singletonMap("id", id));
@@ -156,7 +159,7 @@ public class WebPageController extends BaseAdminController {
 
     verifyLoggedIn(request);
 
-    WebPage webPage = webPageService.getWebPage(id);
+    WebPage webPage = webPageService.getWebPage(new WebPageId(id));
     if (webPage == null) {
       throw new KayaResourceNotFoundException(
           "Web page not found", "entity.not.found", Collections.singletonMap("id", id));
@@ -186,12 +189,12 @@ public class WebPageController extends BaseAdminController {
 
     verifyLoggedIn(request);
 
-    WebPage webPage = webPageService.getWebPage(id);
+    WebPage webPage = webPageService.getWebPage(new WebPageId(id));
     if (webPage == null) {
       throw new KayaResourceNotFoundException(
           "Web page not found", "entity.not.found", Collections.singletonMap("id", id));
     }
-    webPageService.deleteWebPage(id);
+    webPageService.deleteWebPage(new WebPageId(id));
 
     return ResponseEntity.ok().build();
   }

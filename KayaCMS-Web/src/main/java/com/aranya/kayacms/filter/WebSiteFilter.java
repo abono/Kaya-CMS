@@ -56,8 +56,8 @@ public class WebSiteFilter implements Filter {
         WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
         if (!webSite.getSetUpComplete()
             && adminUserService.isAdminUserSetUp(webSiteId)
-            && webPageTemplateService.isWebPageTemplateSetUp(webSite)
-            && webPageService.isWebPageSetUp(webSite)) {
+            && webPageTemplateService.isWebPageTemplateSetUp(webSiteId)
+            && webPageService.isWebPageSetUp(webSiteId)) {
           webSite = WebSite.builderClone(webSite).setUpComplete(true).build();
           webSite = webSiteService.updateWebSite(webSite);
         }

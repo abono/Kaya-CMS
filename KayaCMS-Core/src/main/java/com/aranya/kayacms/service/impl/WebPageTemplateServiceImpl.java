@@ -1,36 +1,31 @@
 package com.aranya.kayacms.service.impl;
 
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplate;
+import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplateId;
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplateSearchCriteria;
-import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
+import com.aranya.kayacms.dao.WebPageTemplateDAO;
 import com.aranya.kayacms.exception.KayaServiceException;
-import com.aranya.kayacms.repository.WebPageTemplateRepository;
 import com.aranya.kayacms.service.PublisherService;
 import com.aranya.kayacms.service.WebPageTemplateService;
-import com.aranya.kayacms.util.ListSearchResults;
 import com.aranya.kayacms.util.SearchResults;
-import java.time.Instant;
-import java.util.Optional;
+import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
 public class WebPageTemplateServiceImpl implements WebPageTemplateService {
 
-  private final WebPageTemplateRepository webPageTemplateRepository;
+  private final WebPageTemplateDAO webPageTemplateDAO;
 
   @Override
-  public boolean isWebPageTemplateSetUp(WebSite webSite) throws KayaServiceException {
+  public boolean isWebPageTemplateSetUp(WebSiteId webSiteId) throws KayaServiceException {
     try {
-      WebPageTemplate webPageTemplate = WebPageTemplate.builder().webSite(webSite).build();
-      Example<WebPageTemplate> example = Example.of(webPageTemplate);
-      long count = webPageTemplateRepository.count(example);
+      WebPageTemplateSearchCriteria criteria =
+          new WebPageTemplateSearchCriteria(1, 1, true, webSiteId);
+      long count = webPageTemplateDAO.searchWebPageTemplate(criteria).getTotalItems();
       return count > 0;
     } catch (Exception e) {
       throw new KayaServiceException(e);
@@ -41,34 +36,27 @@ public class WebPageTemplateServiceImpl implements WebPageTemplateService {
   public SearchResults<WebPageTemplate> searchWebPageTemplates(
       WebPageTemplateSearchCriteria criteria) throws KayaServiceException {
     try {
-      Sort sort = Sort.by("name");
-      Pageable pageable = PageRequest.of(criteria.getPage() - 1, criteria.getItemsPerPage(), sort);
-
-      WebPageTemplate webPageTemplate =
-          WebPageTemplate.builder().webSite(criteria.getWebSite()).build();
-      Example<WebPageTemplate> example = Example.of(webPageTemplate);
-
-      Page<WebPageTemplate> results = webPageTemplateRepository.findAll(example, pageable);
-
-      return new ListSearchResults<WebPageTemplate>(
-          results.getContent(),
-          criteria.getPage(),
-          criteria.getItemsPerPage(),
-          results.getTotalPages());
+      return webPageTemplateDAO.searchWebPageTemplate(criteria);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
   }
 
   @Override
-  public WebPageTemplate getWebPageTemplate(Long webPageTemplateId) throws KayaServiceException {
+  public List<WebPageTemplate> getUnpublishedWebPageTemplate(WebSiteId webSiteId)
+      throws KayaServiceException {
     try {
-      Optional<WebPageTemplate> optional = webPageTemplateRepository.findById(webPageTemplateId);
-      if (optional.isPresent()) {
-        return optional.get();
-      } else {
-        return null;
-      }
+      return webPageTemplateDAO.getUnpublishedWebPageTemplate(webSiteId);
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
+
+  @Override
+  public WebPageTemplate getWebPageTemplate(WebPageTemplateId webPageTemplateId)
+      throws KayaServiceException {
+    try {
+      return webPageTemplateDAO.getWebPageTemplate(webPageTemplateId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
@@ -79,16 +67,9 @@ public class WebPageTemplateServiceImpl implements WebPageTemplateService {
   public WebPageTemplate createWebPageTemplate(WebPageTemplate webPageTemplate)
       throws KayaServiceException {
     try {
-      WebPageTemplate newWebPageTemplate =
-          WebPageTemplate.builderClone(webPageTemplate)
-              .webPageTemplateId(null)
-              .createDate(Instant.now())
-              .modifyDate(Instant.now())
-              .build();
-
-      webPageTemplate = webPageTemplateRepository.save(newWebPageTemplate);
-
-      return webPageTemplate;
+      WebPageTemplateId webPageTemplateId =
+          webPageTemplateDAO.insertWebPageTemplate(webPageTemplate);
+      return webPageTemplateDAO.getWebPageTemplate(webPageTemplateId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
@@ -96,35 +77,20 @@ public class WebPageTemplateServiceImpl implements WebPageTemplateService {
 
   /**
    * This method ONLY saves the edits and records a new modify date. It will ignore all other
-   * changes. If you want to change the actual live values (name, content, etc.), you much call this
+   * changes. If you want to change the actual live values (name, content, etc.), you must call this
    * method to save the EDITS and then publish in order to copy those edits over to the live values.
    *
    * @see PublisherService
    */
   @Override
-  public WebPageTemplate updateWebPageTemplate(WebPageTemplate entity) throws KayaServiceException {
+  public WebPageTemplate updateWebPageTemplate(WebPageTemplate webPageTemplate)
+      throws KayaServiceException {
     try {
-      if (entity.getWebPageTemplateId() == null) {
+      if (webPageTemplate.getWebPageTemplateId() == null) {
         throw new KayaServiceException("Web page template ID not set.");
       } else {
-        Optional<WebPageTemplate> webPageTemplate =
-            webPageTemplateRepository.findById(entity.getWebPageTemplateId());
-
-        if (webPageTemplate.isPresent()) {
-          WebPageTemplate newEntity =
-              WebPageTemplate.builderClone(webPageTemplate.get())
-                  .nameEdits(entity.getNameEdits())
-                  .contentEdits(entity.getContentEdits())
-                  .modifyDate(Instant.now())
-                  .publishDate(null)
-                  .build();
-
-          newEntity = webPageTemplateRepository.save(newEntity);
-
-          return newEntity;
-        } else {
-          throw new KayaServiceException("Web page template with given ID does not exist!");
-        }
+        webPageTemplateDAO.updateWebPageTemplate(webPageTemplate);
+        return webPageTemplateDAO.getWebPageTemplate(webPageTemplate.getWebPageTemplateId());
       }
     } catch (Exception e) {
       throw new KayaServiceException(e);
@@ -132,16 +98,26 @@ public class WebPageTemplateServiceImpl implements WebPageTemplateService {
   }
 
   @Override
-  public void deleteWebPageTemplate(Long webPageTemplateId) throws KayaServiceException {
+  @Transactional
+  public void publishWebPageTemplate(List<WebPageTemplateId> webPageTemplateIds)
+      throws KayaServiceException {
     try {
-      Optional<WebPageTemplate> webPageTemplate =
-          webPageTemplateRepository.findById(webPageTemplateId);
+      for (WebPageTemplateId webPageTemplateId : webPageTemplateIds) {
+        webPageTemplateDAO.publishWebPageTemplate(webPageTemplateId);
+      }
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
 
-      if (webPageTemplate.isPresent()) {
-        webPageTemplateRepository.deleteById(webPageTemplateId);
-      } else {
+  @Override
+  public void deleteWebPageTemplate(WebPageTemplateId webPageTemplateId)
+      throws KayaServiceException {
+    try {
+      if (webPageTemplateDAO.getWebPageTemplate(webPageTemplateId) == null) {
         throw new KayaServiceException("Web page template with given ID does not exist!");
       }
+      webPageTemplateDAO.deleteWebPageTemplate(webPageTemplateId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
