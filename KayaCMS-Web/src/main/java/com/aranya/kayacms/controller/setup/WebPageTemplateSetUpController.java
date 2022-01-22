@@ -2,7 +2,6 @@ package com.aranya.kayacms.controller.setup;
 
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplate;
 import com.aranya.kayacms.beans.website.WebSite;
-import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.exception.KayaServiceException;
 import com.aranya.kayacms.properties.DayAndTime;
 import com.aranya.kayacms.service.WebPageTemplateService;
@@ -25,7 +24,7 @@ public class WebPageTemplateSetUpController {
   public @ResponseBody boolean webPageTemplateExists(HttpServletRequest request)
       throws KayaServiceException {
     WebSite webSite = RequestUtil.getWebSite(request);
-    return webPageTemplateService.isWebPageTemplateSetUp(new WebSiteId(webSite.getWebSiteId()));
+    return webPageTemplateService.isWebPageTemplateSetUp(webSite.getWebSiteId());
   }
 
   @RequestMapping(value = "/create", method = RequestMethod.POST)
@@ -46,7 +45,7 @@ public class WebPageTemplateSetUpController {
             .createDate(new DayAndTime())
             .modifyDate(new DayAndTime())
             .publishDate(new DayAndTime())
-            .webSiteId(new WebSiteId(webSite.getWebSiteId()))
+            .webSiteId(webSite.getWebSiteId())
             .build();
 
     webPageTemplateService.createWebPageTemplate(webPageTemplate);

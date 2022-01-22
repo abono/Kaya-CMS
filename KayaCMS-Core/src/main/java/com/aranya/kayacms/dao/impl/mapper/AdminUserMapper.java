@@ -6,7 +6,7 @@ import com.aranya.kayacms.beans.website.WebSiteId;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AdminUserMapper extends AbstractRowMaster<AdminUser> {
+public class AdminUserMapper extends AbstractRowMapper<AdminUser> {
 
   @Override
   public AdminUser mapRow(ResultSet rs, int rowNum) throws SQLException {

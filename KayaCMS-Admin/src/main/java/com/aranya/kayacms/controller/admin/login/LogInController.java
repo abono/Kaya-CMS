@@ -36,7 +36,7 @@ public class LogInController extends BaseController {
       throws KayaServiceException, KayaAccessDeniedException {
 
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
 
     String userName = logInRequest.getUserName();
     String password = logInRequest.getPassword();

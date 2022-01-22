@@ -1,4 +1,4 @@
-insert into web_page_template (
+insert into web_page (
   type,
   path,
   title,

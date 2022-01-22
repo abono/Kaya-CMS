@@ -1,8 +1,10 @@
-import React, { useState, useReducer, useEffect, createRef } from 'react';
+import React, { useState, useReducer, useEffect, createRef, useContext } from 'react';
 import { Button, Container, Form, FormGroup, Input, Label } from 'reactstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 
 import { Editor } from '@tinymce/tinymce-react';
+
+import { UserContext } from '../context/UserContext'
 
 import { APICallInit, APICallState } from "../services/ServiceUtil";
 import { GetWebPage, CreateWebPage, UpdateWebPage } from "../services/WebPageService";
@@ -13,18 +15,23 @@ function WebPageEdit() {
 
     const navigate = useNavigate();
 
+    const [ , userContextDispatch ] = useContext(UserContext);
+
     const [ readState, readDispatch ] = useReducer(APICallState, APICallInit);
     const [ writeState, writeDispatch ] = useReducer(APICallState, APICallInit);
-    const [ errors, setErrors ] = useState( [ ] );
+    
+    const [ type, setType ] = useState('CONTENT');
     const [ path, setPath ] = useState('');
     const [ title, setTitle ] = useState('');
     const [ description, setDescription ] = useState('');
     const [ content, setContent ] = useState('');
+    const [ parameters, setParameters ] = useState('{}');
 
     const editorRef = createRef(null);
 
     useEffect(() => {
         if (!isNew) {
+            userContextDispatch( { type: "ALERT_MESSAGE", payload: "Loading template" });
             GetWebPage(id, readDispatch);
         }
     }, [id, isNew]);
@@ -32,16 +39,35 @@ function WebPageEdit() {
     useEffect(() => {
         console.log("State changed", readState.data);
         if (readState && readState.data) {
-            setPath(readState.data.path);
-            setTitle(readState.data.title);
-            setDescription(readState.data.description);
-            setContent(readState.data.content);
+            userContextDispatch( { type: "ALERT_CLOSE" });
+
+            if (readState.data.edited) {
+                setType(readState.data.typeEdits);
+                setPath(readState.data.pathEdits);
+                setTitle(readState.data.titleEdits);
+                setDescription(readState.data.descriptionEdits);
+                setContent(readState.data.contentEdits);
+                setParameters(readState.data.parametersEdits);
+            } else {
+                setType(readState.data.type);
+                setPath(readState.data.path);
+                setTitle(readState.data.title);
+                setDescription(readState.data.description);
+                setContent(readState.data.content);
+                setParameters(readState.data.parameters);
+            }
+        }
+        if (readState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: readState.errorMessage });
         }
     }, [readState]);
 
     useEffect(() => {
         if (writeState.data && !writeState.isError) {
             navigate("/webPage");
+        }
+        if (writeState.isError) {
+            userContextDispatch( { type: "ALERT_ERROR", payload: writeState.errorMessage });
         }
     }, [writeState]);
 
@@ -79,56 +105,32 @@ function WebPageEdit() {
             // Required field
             err.push('Please provide a description for your page');
         }
-        setErrors(err);
         if (err.length === 0) {
             const webPage = {
-                path: path,
-                title: title,
-                description: description,
-                content: content,
+                typeEdits: type,
+                pathEdits: path,
+                titleEdits: title,
+                descriptionEdits: description,
+                contentEdits: content,
+                parametersEdits: parameters,
             };
             if (isNew) {
+                userContextDispatch( { type: "ALERT_MESSAGE", payload: "Creating new page" } );
                 CreateWebPage(webPage, writeDispatch);
             } else {
                 webPage.webPageId = id;
+                userContextDispatch( { type: "ALERT_MESSAGE", payload: "Updating page" } );
                 UpdateWebPage(webPage, writeDispatch);
             }
+        } else {
+            userContextDispatch( { type: "ALERT_ERROR", payload: err.map((error, index) => 
+                <div key={index}>{error}</div>
+            ) } );
         }
     }
 
     return <div>
         <Container>
-
-            {readState.isLoading &&
-                <div className="alert alert-warning" role="alert">
-                    Loading...
-                </div>
-            }
-
-            {readState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {readState.errorMessage}
-                </div>
-            }
-
-            {writeState.isLoading &&
-                <div className="alert alert-warning" role="alert">
-                    Saving...
-                </div>
-            }
-
-            {writeState.isError &&
-                <div className="alert alert-danger" role="alert">
-                    {writeState.errorMessage}
-                </div>
-            }
-
-            {errors.map((error, index) =>
-                <div key={index} className="alert alert-danger" role="alert">
-                    {error}
-                </div>
-            )}
-
             <Form onSubmit={handleSubmit}>
                 <FormGroup>
                     <Label for="path">Path</Label>
@@ -149,7 +151,7 @@ function WebPageEdit() {
                     <Label for="content">Content</Label>
                     <Editor
                         onInit={(evt, editor) => editorRef.current = editor}
-                        initialValue={content}
+                        value={content}
                         init={{
                             height: 500,
                             menubar: true,

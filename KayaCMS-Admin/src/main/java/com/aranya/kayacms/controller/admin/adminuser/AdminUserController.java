@@ -75,7 +75,7 @@ public class AdminUserController extends BaseAdminController {
       throws KayaServiceException, KayaAccessDeniedException {
 
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
 
     verifyLoggedIn(request);
 
@@ -98,7 +98,7 @@ public class AdminUserController extends BaseAdminController {
     verifyLoggedIn(request);
 
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
 
     AdminUser adminUser = adminUserService.getAdminUser(new AdminUserId(id));
     if (adminUser == null || !adminUser.getWebSiteId().equals(webSiteId)) {
@@ -116,7 +116,7 @@ public class AdminUserController extends BaseAdminController {
     verifyLoggedIn(request);
 
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
 
     AdminUser adminUser =
         AdminUser.builder()
@@ -145,7 +145,7 @@ public class AdminUserController extends BaseAdminController {
     verifyLoggedIn(request);
 
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
 
     AdminUser adminUser = adminUserService.getAdminUser(new AdminUserId(id));
     if (adminUser == null || !adminUser.getWebSiteId().equals(webSiteId)) {
@@ -182,7 +182,7 @@ public class AdminUserController extends BaseAdminController {
     verifyLoggedIn(request);
 
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
 
     AdminUser adminUser = adminUserService.getAdminUser(new AdminUserId(id));
     if (adminUser == null || !adminUser.getWebSiteId().equals(webSiteId)) {

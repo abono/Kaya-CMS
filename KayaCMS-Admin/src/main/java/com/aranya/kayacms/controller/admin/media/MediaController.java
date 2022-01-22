@@ -1,12 +1,15 @@
 package com.aranya.kayacms.controller.admin.media;
 
 import com.aranya.kayacms.beans.media.Media;
+import com.aranya.kayacms.beans.media.MediaId;
 import com.aranya.kayacms.beans.media.MediaSearchCriteria;
 import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.controller.admin.BaseAdminController;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
 import com.aranya.kayacms.exception.KayaResourceNotFoundException;
 import com.aranya.kayacms.exception.KayaServiceException;
+import com.aranya.kayacms.properties.ByteArrayBinaryContent;
 import com.aranya.kayacms.service.MediaService;
 import com.aranya.kayacms.util.ListSearchResults;
 import com.aranya.kayacms.util.RequestUtil;
@@ -39,17 +42,17 @@ public class MediaController extends BaseAdminController {
   private final MediaService mediaService;
 
   private void populateBase(Media item, MediaResponse response) {
-    response.setMediaId(item.getMediaId());
+    response.setMediaId(item.getMediaId().getId());
     response.setType(item.getType());
     response.setPath(item.getPath());
 
-    response.setCreateDate(item.getCreateDate());
-    response.setModifyDate(item.getCreateDate());
-    response.setPublishDate(item.getCreateDate());
+    response.setCreateDate(item.getCreateDate().getDate());
+    response.setModifyDate(item.getCreateDate().getDate());
+    response.setPublishDate(item.getCreateDate() == null ? null : item.getCreateDate().getDate());
     response.setEdited(
         !StringUtils.isAllEmpty(item.getTypeEdits())
             || !StringUtils.isAllEmpty(item.getPathEdits())
-            || item.getContentEdits().length > 0);
+            || item.getContentEdits().size() > 0);
   }
 
   private MediaResponse convertSearchItem(Media item) {
@@ -78,11 +81,12 @@ public class MediaController extends BaseAdminController {
       @RequestParam(name = "itemsPerPage", defaultValue = "50", required = false) int itemsPerPage)
       throws KayaServiceException, KayaAccessDeniedException {
 
-    WebSite webSite = RequestUtil.getWebSite(request);
-
     verifyLoggedIn(request);
 
-    MediaSearchCriteria criteria = new MediaSearchCriteria(itemsPerPage, page, false, webSite);
+    WebSite webSite = RequestUtil.getWebSite(request);
+    WebSiteId webSiteId = webSite.getWebSiteId();
+
+    MediaSearchCriteria criteria = new MediaSearchCriteria(itemsPerPage, page, false, webSiteId);
     SearchResults<Media> searchResults = mediaService.searchMedias(criteria);
     List<MediaResponse> items =
         searchResults.getItems().stream()
@@ -98,7 +102,7 @@ public class MediaController extends BaseAdminController {
 
     verifyLoggedIn(request);
 
-    Media media = mediaService.getMedia(id);
+    Media media = mediaService.getMedia(new MediaId(id));
     if (media == null) {
       throw new KayaResourceNotFoundException(
           "Media not found", "entity.not.found", Collections.singletonMap("id", id));
@@ -117,7 +121,7 @@ public class MediaController extends BaseAdminController {
         Media.builder()
             .path(mediaRequest.getPathEdits())
             .type(mediaRequest.getTypeEdits())
-            .content(new byte[0])
+            .content(new ByteArrayBinaryContent(new byte[0]))
             .pathEdits(mediaRequest.getPathEdits())
             .typeEdits(mediaRequest.getTypeEdits())
             .build();
@@ -141,7 +145,7 @@ public class MediaController extends BaseAdminController {
     // TODO Get the content uploaded.
 
     Media media =
-        Media.builderClone(mediaService.getMedia(id))
+        Media.builderClone(mediaService.getMedia(new MediaId(id)))
             .pathEdits(mediaRequest.getPathEdits())
             .typeEdits(mediaRequest.getTypeEdits())
             .build();
@@ -161,12 +165,13 @@ public class MediaController extends BaseAdminController {
 
     verifyLoggedIn(request);
 
-    Media media = mediaService.getMedia(id);
+    MediaId mediaId = new MediaId(id);
+    Media media = mediaService.getMedia(mediaId);
     if (media == null) {
       throw new KayaResourceNotFoundException(
           "Media not found", "entity.not.found", Collections.singletonMap("id", id));
     }
-    mediaService.deleteMedia(id);
+    mediaService.deleteMedia(mediaId);
 
     return ResponseEntity.ok().build();
   }

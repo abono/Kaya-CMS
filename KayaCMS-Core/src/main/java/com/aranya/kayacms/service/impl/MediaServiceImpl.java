@@ -1,72 +1,57 @@
 package com.aranya.kayacms.service.impl;
 
 import com.aranya.kayacms.beans.media.Media;
+import com.aranya.kayacms.beans.media.MediaId;
 import com.aranya.kayacms.beans.media.MediaSearchCriteria;
-import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.website.WebSiteId;
+import com.aranya.kayacms.dao.MediaDAO;
 import com.aranya.kayacms.exception.KayaServiceException;
-import com.aranya.kayacms.repository.MediaRepository;
 import com.aranya.kayacms.service.MediaService;
-import com.aranya.kayacms.service.PublisherService;
-import com.aranya.kayacms.util.ListSearchResults;
 import com.aranya.kayacms.util.SearchResults;
-import java.time.Instant;
-import java.util.Optional;
+import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class MediaServiceImpl implements MediaService {
 
-  private final MediaRepository mediaRepository;
+  private final MediaDAO mediaDAO;
 
   @Override
-  public SearchResults<Media> searchMedias(MediaSearchCriteria criteria) {
-    Sort sort = Sort.by("path");
-    Pageable pageable = PageRequest.of(criteria.getPage() - 1, criteria.getItemsPerPage(), sort);
-
-    Media media = Media.builder().webSite(criteria.getWebSite()).build();
-    Example<Media> example = Example.of(media);
-
-    Page<Media> results = mediaRepository.findAll(example, pageable);
-
-    return new ListSearchResults<Media>(
-        results.getContent(),
-        criteria.getPage(),
-        criteria.getItemsPerPage(),
-        results.getTotalPages());
-  }
-
-  @Override
-  public Media getMedia(WebSite webSite, String path) throws KayaServiceException {
+  public SearchResults<Media> searchMedias(MediaSearchCriteria criteria)
+      throws KayaServiceException {
     try {
-      Media media = Media.builder().path(path).webSite(webSite).build();
-      Example<Media> example = Example.of(media);
-      Optional<Media> results = mediaRepository.findOne(example);
-      if (results.isPresent()) {
-        return results.get();
-      } else {
-        return null;
-      }
+      return mediaDAO.searchMedia(criteria);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
   }
 
   @Override
-  public Media getMedia(Long mediaId) throws KayaServiceException {
+  public List<Media> getUnpublishedMedia(WebSiteId webSiteId) throws KayaServiceException {
     try {
-      Optional<Media> optional = mediaRepository.findById(mediaId);
-      if (optional.isPresent()) {
-        return optional.get();
-      } else {
-        return null;
-      }
+      return mediaDAO.getUnpublishedMedia(webSiteId);
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
+
+  @Override
+  public Media getMedia(MediaId mediaId) throws KayaServiceException {
+    try {
+      return mediaDAO.getMedia(mediaId);
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
+
+  @Override
+  public Media getMedia(WebSiteId webSiteId, String path) throws KayaServiceException {
+    try {
+      return mediaDAO.getMedia(webSiteId, path);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
@@ -76,17 +61,8 @@ public class MediaServiceImpl implements MediaService {
   @Override
   public Media createMedia(Media media) throws KayaServiceException {
     try {
-      Media newMedia =
-          Media.builder()
-              .mediaId(null)
-              .createDate(Instant.now())
-              .modifyDate(Instant.now())
-              .publishDate(null)
-              .build();
-
-      media = mediaRepository.save(newMedia);
-
-      return media;
+      MediaId mediaId = mediaDAO.insertMedia(media);
+      return mediaDAO.getMedia(mediaId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }
@@ -94,34 +70,18 @@ public class MediaServiceImpl implements MediaService {
 
   /**
    * This method ONLY saves the edits and records a new modify date. It will ignore all other
-   * changes. If you want to change the actual live values (name, content, etc.), you much call this
-   * method to save the EDITS and then publish in order to copy those edits over to the live values.
-   *
-   * @see PublisherService
+   * changes. If you want to change the actual live values (type, path, content, etc.), you must
+   * call this method to save the EDITS and then publish in order to copy those edits over to the
+   * live values.
    */
   @Override
-  public Media updateMedia(Media entity) throws KayaServiceException {
+  public Media updateMedia(Media media) throws KayaServiceException {
     try {
-      if (entity.getMediaId() == null) {
+      if (media.getMediaId() == null) {
         throw new KayaServiceException("Media ID not set.");
       } else {
-        Optional<Media> media = mediaRepository.findById(entity.getMediaId());
-
-        if (media.isPresent()) {
-          Media newEntity =
-              Media.builderClone(media.get())
-                  .pathEdits(entity.getPathEdits())
-                  .typeEdits(entity.getTypeEdits())
-                  .contentEdits(entity.getContentEdits())
-                  .modifyDate(Instant.now())
-                  .build();
-
-          newEntity = mediaRepository.save(newEntity);
-
-          return newEntity;
-        } else {
-          throw new KayaServiceException("Media with given ID does not exist!");
-        }
+        mediaDAO.updateMedia(media);
+        return mediaDAO.getMedia(media.getMediaId());
       }
     } catch (Exception e) {
       throw new KayaServiceException(e);
@@ -129,15 +89,24 @@ public class MediaServiceImpl implements MediaService {
   }
 
   @Override
-  public void deleteMedia(Long mediaId) throws KayaServiceException {
+  @Transactional
+  public void publishMedia(List<MediaId> mediaIds) throws KayaServiceException {
     try {
-      Optional<Media> media = mediaRepository.findById(mediaId);
+      for (MediaId mediaId : mediaIds) {
+        mediaDAO.publishMedia(mediaId);
+      }
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
 
-      if (media.isPresent()) {
-        mediaRepository.deleteById(mediaId);
-      } else {
+  @Override
+  public void deleteMedia(MediaId mediaId) throws KayaServiceException {
+    try {
+      if (mediaDAO.getMedia(mediaId) == null) {
         throw new KayaServiceException("Media with given ID does not exist!");
       }
+      mediaDAO.deleteMedia(mediaId);
     } catch (Exception e) {
       throw new KayaServiceException(e);
     }

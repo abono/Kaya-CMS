@@ -4,7 +4,6 @@ import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplate;
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplateId;
 import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplateSearchCriteria;
 import com.aranya.kayacms.beans.website.WebSite;
-import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.controller.admin.BaseAdminController;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
 import com.aranya.kayacms.exception.KayaResourceNotFoundException;
@@ -47,7 +46,7 @@ public class WebPageTemplateController extends BaseAdminController {
 
     response.setCreateDate(item.getCreateDate().getDate());
     response.setModifyDate(item.getCreateDate().getDate());
-    response.setPublishDate(item.getCreateDate().getDate());
+    response.setPublishDate(item.getCreateDate() == null ? null : item.getCreateDate().getDate());
     response.setEdited(
         !StringUtils.isAllEmpty(item.getNameEdits())
             || !StringUtils.isAllEmpty(item.getContentEdits()));
@@ -84,8 +83,7 @@ public class WebPageTemplateController extends BaseAdminController {
     verifyLoggedIn(request);
 
     WebPageTemplateSearchCriteria criteria =
-        new WebPageTemplateSearchCriteria(
-            itemsPerPage, page, false, new WebSiteId(webSite.getWebSiteId()));
+        new WebPageTemplateSearchCriteria(itemsPerPage, page, false, webSite.getWebSiteId());
     SearchResults<WebPageTemplate> searchResults =
         webPageTemplateService.searchWebPageTemplates(criteria);
     List<WebPageTemplateResponse> items =
@@ -127,7 +125,7 @@ public class WebPageTemplateController extends BaseAdminController {
             .content("")
             .nameEdits(webPageTemplateRequest.getNameEdits())
             .contentEdits(webPageTemplateRequest.getContentEdits())
-            .webSiteId(new WebSiteId(webSite.getWebSiteId()))
+            .webSiteId(webSite.getWebSiteId())
             .build();
 
     webPageTemplate = webPageTemplateService.createWebPageTemplate(webPageTemplate);

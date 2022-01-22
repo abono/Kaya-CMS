@@ -8,7 +8,7 @@ import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.controller.admin.BaseAdminController;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
 import com.aranya.kayacms.exception.KayaServiceException;
-import com.aranya.kayacms.service.PublisherService;
+import com.aranya.kayacms.service.MediaService;
 import com.aranya.kayacms.service.WebPageService;
 import com.aranya.kayacms.service.WebPageTemplateService;
 import com.aranya.kayacms.util.RequestUtil;
@@ -30,7 +30,7 @@ public class PublishController extends BaseAdminController {
 
   private final WebPageService webPageService;
 
-  private final PublisherService publisherService;
+  private final MediaService mediaService;
 
   private WebPageTemplateSummary convertItem(WebPageTemplate item) {
     WebPageTemplateSummary summary = new WebPageTemplateSummary();
@@ -40,7 +40,7 @@ public class PublishController extends BaseAdminController {
     summary.setNameEdits(item.getNameEdits());
     summary.setCreateDate(item.getCreateDate().getDate());
     summary.setModifyDate(item.getModifyDate().getDate());
-    summary.setPublishDate(item.getPublishDate().getDate());
+    summary.setPublishDate(item.getCreateDate() == null ? null : item.getCreateDate().getDate());
 
     return summary;
   }
@@ -59,7 +59,7 @@ public class PublishController extends BaseAdminController {
     summary.setDescriptionEdits(item.getDescriptionEdits());
     summary.setCreateDate(item.getCreateDate().getDate());
     summary.setModifyDate(item.getModifyDate().getDate());
-    summary.setPublishDate(item.getPublishDate().getDate());
+    summary.setPublishDate(item.getCreateDate() == null ? null : item.getCreateDate().getDate());
     summary.setWebPageTemplateId(item.getWebPageTemplateId().getId());
     summary.setWebPageTemplateIdEdits(item.getWebPageTemplateIdEdits().getId());
 
@@ -69,14 +69,14 @@ public class PublishController extends BaseAdminController {
   private MediaSummary convertItem(Media item) {
     MediaSummary summary = new MediaSummary();
 
-    summary.setMediaId(item.getMediaId());
+    summary.setMediaId(item.getMediaId().getId());
     summary.setType(item.getType());
     summary.setPath(item.getPath());
     summary.setTypeEdits(item.getTypeEdits());
     summary.setPathEdits(item.getPathEdits());
-    summary.setCreateDate(item.getCreateDate());
-    summary.setModifyDate(item.getModifyDate());
-    summary.setPublishDate(item.getPublishDate());
+    summary.setCreateDate(item.getCreateDate().getDate());
+    summary.setModifyDate(item.getModifyDate().getDate());
+    summary.setPublishDate(item.getCreateDate() == null ? null : item.getCreateDate().getDate());
 
     return summary;
   }
@@ -88,7 +88,7 @@ public class PublishController extends BaseAdminController {
     verifyLoggedIn(request);
 
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
 
     List<WebPageTemplateSummary> webPageTemplateSummaries =
         webPageTemplateService.getUnpublishedWebPageTemplate(webSiteId).stream()
@@ -101,7 +101,7 @@ public class PublishController extends BaseAdminController {
             .collect(Collectors.toList());
 
     List<MediaSummary> mediaSummaries =
-        publisherService.getUnpublishedMedia(webSite).stream()
+        mediaService.getUnpublishedMedia(webSiteId).stream()
             .map(item -> convertItem(item))
             .collect(Collectors.toList());
 

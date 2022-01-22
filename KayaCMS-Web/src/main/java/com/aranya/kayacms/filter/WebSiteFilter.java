@@ -53,7 +53,7 @@ public class WebSiteFilter implements Filter {
         }
       } else {
         // Make sure it isn't actually set up and the web site just didn't get updated properly.
-        WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+        WebSiteId webSiteId = webSite.getWebSiteId();
         if (!webSite.getSetUpComplete()
             && adminUserService.isAdminUserSetUp(webSiteId)
             && webPageTemplateService.isWebPageTemplateSetUp(webSiteId)

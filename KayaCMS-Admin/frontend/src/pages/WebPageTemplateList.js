@@ -8,7 +8,7 @@ import { APICallInit, APICallState } from "../services/ServiceUtil";
 import { SearchWebPageTemplate, DeleteWebPageTemplate } from "../services/WebPageTemplateService";
 
 function WebPageTemplateList() {
-    const [ userContext, userContextDispatch ] = useContext(UserContext);
+    const [ , userContextDispatch ] = useContext(UserContext);
 
     const [ webPageTemplates, setWebPageTemplates ] = useState( [ ] );
     const [ searchState, searchDispatch ] = useReducer(APICallState, APICallInit);

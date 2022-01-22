@@ -26,7 +26,7 @@ public class AdminUserSetUpController extends BaseController {
   public @ResponseBody boolean adminUserExists(HttpServletRequest request)
       throws KayaServiceException {
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
     return adminUserService.isAdminUserSetUp(webSiteId);
   }
 
@@ -38,7 +38,7 @@ public class AdminUserSetUpController extends BaseController {
     }
 
     WebSite webSite = RequestUtil.getWebSite(request);
-    WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+    WebSiteId webSiteId = webSite.getWebSiteId();
 
     AdminUser newAdminUser =
         AdminUser.builderClone(adminUser)

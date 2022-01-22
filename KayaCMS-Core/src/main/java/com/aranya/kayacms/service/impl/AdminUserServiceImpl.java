@@ -10,9 +10,11 @@ import com.aranya.kayacms.service.AdminUserService;
 import com.aranya.kayacms.util.SearchResults;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class AdminUserServiceImpl implements AdminUserService {
 
   private final AdminUserDAO adminUserDAO;

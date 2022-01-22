@@ -1,31 +1,70 @@
 package com.aranya.kayacms.service.impl;
 
 import com.aranya.kayacms.beans.redirect.Redirect;
-import com.aranya.kayacms.beans.website.WebSite;
+import com.aranya.kayacms.beans.redirect.RedirectId;
+import com.aranya.kayacms.beans.redirect.RedirectSearchCriteria;
+import com.aranya.kayacms.beans.website.WebSiteId;
+import com.aranya.kayacms.dao.RedirectDAO;
 import com.aranya.kayacms.exception.KayaServiceException;
-import com.aranya.kayacms.repository.RedirectRepository;
 import com.aranya.kayacms.service.RedirectService;
-import java.util.Optional;
+import com.aranya.kayacms.util.SearchResults;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class RedirectServiceImpl implements RedirectService {
 
-  private final RedirectRepository redirectRepository;
+  private final RedirectDAO redirectDAO;
 
   @Override
-  public Redirect getRedirect(WebSite webSite, String fromPath) throws KayaServiceException {
+  public SearchResults<Redirect> searchRedirects(RedirectSearchCriteria criteria)
+      throws KayaServiceException {
     try {
-      Redirect redirect = Redirect.builder().fromPath(fromPath).webSite(webSite).build();
-      Example<Redirect> example = Example.of(redirect);
-      Optional<Redirect> results = redirectRepository.findOne(example);
-      if (results.isPresent()) {
-        return results.get();
+      return redirectDAO.searchRedirects(criteria);
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
+
+  @Override
+  public Redirect getRedirect(WebSiteId webSiteId, String fromPath) throws KayaServiceException {
+    try {
+      return redirectDAO.getRedirect(webSiteId, fromPath);
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
+
+  @Override
+  public Redirect getRedirect(RedirectId redirectId) throws KayaServiceException {
+    try {
+      return redirectDAO.getRedirect(redirectId);
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
+
+  @Override
+  public Redirect createRedirect(Redirect redirect) throws KayaServiceException {
+    try {
+      RedirectId redirectId = redirectDAO.insertRedirect(redirect);
+      return redirectDAO.getRedirect(redirectId);
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
+  }
+
+  @Override
+  public Redirect updateRedirect(Redirect redirect) throws KayaServiceException {
+    try {
+      if (redirect.getRedirectId() == null) {
+        throw new KayaServiceException("Redirect ID not set.");
       } else {
-        return null;
+        redirectDAO.updateRedirect(redirect);
+        return redirectDAO.getRedirect(redirect.getRedirectId());
       }
     } catch (Exception e) {
       throw new KayaServiceException(e);
@@ -33,25 +72,14 @@ public class RedirectServiceImpl implements RedirectService {
   }
 
   @Override
-  public Redirect getRedirect(Long redirectId) throws KayaServiceException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Redirect createRedirect(Redirect redirect) throws KayaServiceException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Redirect updateRedirect(Redirect redirect) throws KayaServiceException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void deleteRedirect(Long redirectId) throws KayaServiceException {
-    // TODO Auto-generated method stub
+  public void deleteRedirect(RedirectId redirectId) throws KayaServiceException {
+    try {
+      if (redirectDAO.getRedirect(redirectId) == null) {
+        throw new KayaServiceException("Redirect with given ID does not exist!");
+      }
+      redirectDAO.deleteRedirect(redirectId);
+    } catch (Exception e) {
+      throw new KayaServiceException(e);
+    }
   }
 }

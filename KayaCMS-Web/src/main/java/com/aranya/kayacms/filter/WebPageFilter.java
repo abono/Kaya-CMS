@@ -132,10 +132,10 @@ public class WebPageFilter implements Filter {
 
     try {
       if (StringUtils.isBlank(extension) || extension.equals("htm") || extension.equals("html")) {
-        WebSiteId webSiteId = new WebSiteId(webSite.getWebSiteId());
+        WebSiteId webSiteId = webSite.getWebSiteId();
         WebPage webPage = webPageService.getWebPage(webSiteId, path);
         if (webPage == null) {
-          Redirect redirect = redirectService.getRedirect(webSite, path);
+          Redirect redirect = redirectService.getRedirect(webSiteId, path);
           if (redirect == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
           } else {
@@ -145,9 +145,10 @@ public class WebPageFilter implements Filter {
           serveWebPageContent(webSite, webPage, response);
         }
       } else {
-        Media media = mediaService.getMedia(webSite, path);
+        WebSiteId webSiteId = webSite.getWebSiteId();
+        Media media = mediaService.getMedia(webSiteId, path);
         if (media == null) {
-          Redirect redirect = redirectService.getRedirect(webSite, path);
+          Redirect redirect = redirectService.getRedirect(webSiteId, path);
           if (redirect == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
           } else {
@@ -155,7 +156,7 @@ public class WebPageFilter implements Filter {
           }
         } else {
           try (OutputStream out = response.getOutputStream()) {
-            out.write(media.getContent());
+            IOUtils.copy(media.getContent().getData(), out);
             out.flush();
           }
         }

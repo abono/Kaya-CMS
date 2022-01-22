@@ -6,7 +6,6 @@ import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplateSearchCriteria;
 import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.dao.WebPageTemplateDAO;
 import com.aranya.kayacms.exception.KayaServiceException;
-import com.aranya.kayacms.service.PublisherService;
 import com.aranya.kayacms.service.WebPageTemplateService;
 import com.aranya.kayacms.util.SearchResults;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class WebPageTemplateServiceImpl implements WebPageTemplateService {
 
   private final WebPageTemplateDAO webPageTemplateDAO;
@@ -79,8 +79,6 @@ public class WebPageTemplateServiceImpl implements WebPageTemplateService {
    * This method ONLY saves the edits and records a new modify date. It will ignore all other
    * changes. If you want to change the actual live values (name, content, etc.), you must call this
    * method to save the EDITS and then publish in order to copy those edits over to the live values.
-   *
-   * @see PublisherService
    */
   @Override
   public WebPageTemplate updateWebPageTemplate(WebPageTemplate webPageTemplate)

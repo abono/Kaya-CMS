@@ -7,7 +7,7 @@ import com.aranya.kayacms.beans.website.WebSiteId;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class WebPageMapper extends AbstractRowMaster<WebPage> {
+public class WebPageMapper extends AbstractRowMapper<WebPage> {
 
   @Override
   public WebPage mapRow(ResultSet rs, int rowNum) throws SQLException {

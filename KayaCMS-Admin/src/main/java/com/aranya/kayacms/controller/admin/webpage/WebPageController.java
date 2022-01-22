@@ -4,7 +4,6 @@ import com.aranya.kayacms.beans.webpage.WebPage;
 import com.aranya.kayacms.beans.webpage.WebPageId;
 import com.aranya.kayacms.beans.webpage.WebPageSearchCriteria;
 import com.aranya.kayacms.beans.website.WebSite;
-import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.controller.admin.BaseAdminController;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
 import com.aranya.kayacms.exception.KayaResourceNotFoundException;
@@ -47,9 +46,14 @@ public class WebPageController extends BaseAdminController {
     response.setTitle(item.getTitle());
     response.setDescription(item.getDescription());
 
+    response.setTypeEdits(item.getTypeEdits());
+    response.setPathEdits(item.getPathEdits());
+    response.setTitleEdits(item.getTitleEdits());
+    response.setDescriptionEdits(item.getDescriptionEdits());
+
     response.setCreateDate(item.getCreateDate().getDate());
     response.setModifyDate(item.getCreateDate().getDate());
-    response.setPublishDate(item.getCreateDate().getDate());
+    response.setPublishDate(item.getCreateDate() == null ? null : item.getCreateDate().getDate());
     response.setEdited(
         !StringUtils.isAllEmpty(item.getTypeEdits())
             || !StringUtils.isAllEmpty(item.getPathEdits())
@@ -74,10 +78,7 @@ public class WebPageController extends BaseAdminController {
 
     response.setContent(item.getContent());
     response.setParameters(item.getParameters());
-    response.setTypeEdits(item.getTypeEdits());
-    response.setPathEdits(item.getPathEdits());
-    response.setTitleEdits(item.getTitleEdits());
-    response.setDescriptionEdits(item.getDescriptionEdits());
+
     response.setContentEdits(item.getContentEdits());
     response.setParametersEdits(item.getParametersEdits());
 
@@ -91,12 +92,12 @@ public class WebPageController extends BaseAdminController {
       @RequestParam(name = "itemsPerPage", defaultValue = "50", required = false) int itemsPerPage)
       throws KayaServiceException, KayaAccessDeniedException {
 
-    WebSite webSite = RequestUtil.getWebSite(request);
-
     verifyLoggedIn(request);
 
+    WebSite webSite = RequestUtil.getWebSite(request);
+
     WebPageSearchCriteria criteria =
-        new WebPageSearchCriteria(itemsPerPage, page, false, new WebSiteId(webSite.getWebSiteId()));
+        new WebPageSearchCriteria(itemsPerPage, page, false, webSite.getWebSiteId());
     SearchResults<WebPage> searchResults = webPageService.searchWebPages(criteria);
     List<WebPageResponse> items =
         searchResults.getItems().stream()
@@ -127,6 +128,8 @@ public class WebPageController extends BaseAdminController {
 
     verifyLoggedIn(request);
 
+    WebSite webSite = RequestUtil.getWebSite(request);
+
     WebPage webPage =
         WebPage.builder()
             .type(webPageRequest.getTypeEdits())
@@ -141,6 +144,7 @@ public class WebPageController extends BaseAdminController {
             .descriptionEdits(webPageRequest.getDescriptionEdits())
             .contentEdits(webPageRequest.getContentEdits())
             .parametersEdits(webPageRequest.getParametersEdits())
+            .webSiteId(webSite.getWebSiteId())
             .build();
 
     webPage = webPageService.createWebPage(webPage);

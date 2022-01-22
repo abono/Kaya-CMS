@@ -13,8 +13,12 @@ export const GetWebPage = (id, dispatch) => {
 export const CreateWebPage = (webPage, dispatch) => {
     console.log("Creating web page template", webPage);
     const body = {
-      nameEdits: webPage.nameEdits,
-      contentEdits: webPage.contentEdits
+      typeEdits: webPage.typeEdits,
+      pathEdits: webPage.pathEdits,
+      titleEdits: webPage.titleEdits,
+      descriptionEdits: webPage.descriptionEdits,
+      contentEdits: webPage.contentEdits,
+      parametersEdits: webPage.parametersEdits
     };
     APIPost('/api/admin/webPage', body, dispatch);
 }
@@ -22,8 +26,12 @@ export const CreateWebPage = (webPage, dispatch) => {
 export const UpdateWebPage = (webPage, dispatch) => {
     console.log("Updating web page template", webPage);
     const body = {
-      nameEdits: webPage.nameEdits,
-      contentEdits: webPage.contentEdits
+      typeEdits: webPage.typeEdits,
+      pathEdits: webPage.pathEdits,
+      titleEdits: webPage.titleEdits,
+      descriptionEdits: webPage.descriptionEdits,
+      contentEdits: webPage.contentEdits,
+      parametersEdits: webPage.parametersEdits
     };
     APIPut('/api/admin/webPage/' + webPage.webPageId, body, dispatch);
 }

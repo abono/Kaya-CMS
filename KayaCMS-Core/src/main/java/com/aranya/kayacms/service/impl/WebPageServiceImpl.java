@@ -6,15 +6,16 @@ import com.aranya.kayacms.beans.webpage.WebPageSearchCriteria;
 import com.aranya.kayacms.beans.website.WebSiteId;
 import com.aranya.kayacms.dao.WebPageDAO;
 import com.aranya.kayacms.exception.KayaServiceException;
-import com.aranya.kayacms.service.PublisherService;
 import com.aranya.kayacms.service.WebPageService;
 import com.aranya.kayacms.util.SearchResults;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class WebPageServiceImpl implements WebPageService {
 
   private final WebPageDAO webPageDAO;
@@ -82,8 +83,6 @@ public class WebPageServiceImpl implements WebPageService {
    * This method ONLY saves the edits and records a new modify date. It will ignore all other
    * changes. If you want to change the actual live values (name, content, etc.), you much call this
    * method to save the EDITS and then publish in order to copy those edits over to the live values.
-   *
-   * @see PublisherService
    */
   @Override
   public WebPage updateWebPage(WebPage webPage) throws KayaServiceException {
