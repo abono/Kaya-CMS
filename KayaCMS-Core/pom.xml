@@ -116,11 +116,11 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${pmd.version}</version>
         <dependencies>
-			    <dependency>
-			      <groupId>org.ow2.asm</groupId>
-			      <artifactId>asm</artifactId>
-			      <version>9.2</version>
-			    </dependency>
+          <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>9.2</version>
+          </dependency>
         </dependencies>
         <executions>
           <execution>
@@ -130,6 +130,7 @@
             </goals>
             <configuration>
               <excludeFromFailureFile>${project.parent.basedir}/config/exclude-pmd.properties</excludeFromFailureFile>
+              <verbose>true</verbose>
             </configuration>
           </execution>
           <execution>
@@ -139,6 +140,7 @@
             </goals>
             <configuration>
               <excludeFromFailureFile>${project.parent.basedir}/config/exclude-cpd.properties</excludeFromFailureFile>
+              <verbose>true</verbose>
             </configuration>
           </execution>
         </executions>
@@ -154,14 +156,14 @@
           <excludeFilterFile>${project.parent.basedir}/config/exclude-spotbugs.xml</excludeFilterFile>
         </configuration>
         <executions>
-	        <execution>
-					  <id>check</id>
-					  <phase>test</phase>
-					  <goals>
-					    <goal>check</goal>
-					  </goals>
-					</execution>
-				</executions>
+          <execution>
+            <id>check</id>
+            <phase>test</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

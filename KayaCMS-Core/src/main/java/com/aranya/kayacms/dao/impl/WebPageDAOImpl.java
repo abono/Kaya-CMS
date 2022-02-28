@@ -111,7 +111,7 @@ public class WebPageDAOImpl extends AbstractDAO implements WebPageDAO {
     paramMap.put("contentEdits", webPage.getContentEdits());
     paramMap.put("parametersEdits", webPage.getParametersEdits());
     paramMap.put("webSiteId", webPage.getWebSiteId().getId());
-    paramMap.put("webPageTemplateIdEdits", webPage.getWebPageTemplateIdEdits());
+    paramMap.put("webPageTemplateIdEdits", webPage.getWebPageTemplateIdEdits().getId());
 
     String sql = getSQL("insert.sql");
     String sqlForId = getSQL("getLastId.sql");

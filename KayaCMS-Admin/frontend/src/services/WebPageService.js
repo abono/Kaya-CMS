@@ -13,6 +13,7 @@ export const GetWebPage = (id, dispatch) => {
 export const CreateWebPage = (webPage, dispatch) => {
     console.log("Creating web page template", webPage);
     const body = {
+      webPageTemplateIdEdits: webPage.webPageTemplateIdEdits,
       typeEdits: webPage.typeEdits,
       pathEdits: webPage.pathEdits,
       titleEdits: webPage.titleEdits,
@@ -26,6 +27,7 @@ export const CreateWebPage = (webPage, dispatch) => {
 export const UpdateWebPage = (webPage, dispatch) => {
     console.log("Updating web page template", webPage);
     const body = {
+      webPageTemplateIdEdits: webPage.webPageTemplateIdEdits,
       typeEdits: webPage.typeEdits,
       pathEdits: webPage.pathEdits,
       titleEdits: webPage.titleEdits,

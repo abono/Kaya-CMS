@@ -44,5 +44,9 @@ public class WebPageResponse {
 
   private Instant publishDate;
 
+  private Long webPageTemplateId;
+
+  private Long webPageTemplateIdEdits;
+
   private boolean edited;
 }

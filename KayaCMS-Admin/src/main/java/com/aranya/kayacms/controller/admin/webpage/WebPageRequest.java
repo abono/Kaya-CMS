@@ -22,4 +22,6 @@ public class WebPageRequest {
   private String contentEdits;
 
   private String parametersEdits;
+
+  private Long webPageTemplateIdEdits;
 }

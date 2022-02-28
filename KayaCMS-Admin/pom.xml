@@ -86,6 +86,7 @@
             </goals>
             <configuration>
               <excludeFromFailureFile>${project.parent.basedir}/config/exclude-pmd.properties</excludeFromFailureFile>
+              <verbose>true</verbose>
             </configuration>
           </execution>
           <execution>
@@ -95,6 +96,7 @@
             </goals>
             <configuration>
               <excludeFromFailureFile>${project.parent.basedir}/config/exclude-cpd.properties</excludeFromFailureFile>
+              <verbose>true</verbose>
             </configuration>
           </execution>
         </executions>

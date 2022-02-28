@@ -1,5 +1,6 @@
 import React, { useState, useReducer, useEffect, createRef, useContext } from 'react';
 import { Button, Container, Form, FormGroup, Input, Label } from 'reactstrap';
+import Select from 'react-select';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 
 import { Editor } from '@tinymce/tinymce-react';
@@ -7,6 +8,7 @@ import { Editor } from '@tinymce/tinymce-react';
 import { UserContext } from '../context/UserContext'
 
 import { APICallInit, APICallState } from "../services/ServiceUtil";
+import { SearchWebPageTemplate } from "../services/WebPageTemplateService";
 import { GetWebPage, CreateWebPage, UpdateWebPage } from "../services/WebPageService";
 
 function WebPageEdit() {
@@ -19,7 +21,11 @@ function WebPageEdit() {
 
     const [ readState, readDispatch ] = useReducer(APICallState, APICallInit);
     const [ writeState, writeDispatch ] = useReducer(APICallState, APICallInit);
+
+    const [ readWebPageTemplatesState, readWebPageTemplatesDispatch ] = useReducer(APICallState, APICallInit);
+    const [ webPageTemplates, setWebPageTemplates ] = useState( [ ] );
     
+    const [ webPageTemplateId, setWebPageTemplateId ] = useState();
     const [ type, setType ] = useState('CONTENT');
     const [ path, setPath ] = useState('');
     const [ title, setTitle ] = useState('');
@@ -30,6 +36,7 @@ function WebPageEdit() {
     const editorRef = createRef(null);
 
     useEffect(() => {
+        SearchWebPageTemplate(1, 100, readWebPageTemplatesDispatch);
         if (!isNew) {
             userContextDispatch( { type: "ALERT_MESSAGE", payload: "Loading template" });
             GetWebPage(id, readDispatch);
@@ -37,11 +44,25 @@ function WebPageEdit() {
     }, [id, isNew]);
 
     useEffect(() => {
+        console.log("Processing web page templates", readWebPageTemplatesState);
+        if (readWebPageTemplatesState.data && readWebPageTemplatesState.data.items) {
+            console.log("Found items", readWebPageTemplatesState.data.items);
+            setWebPageTemplates(readWebPageTemplatesState.data.items.map(item => {
+                return {
+                    value: item.webPageTemplateId,
+                    label: item.name
+                };
+            }));
+        }
+    }, [readWebPageTemplatesState]);
+
+    useEffect(() => {
         console.log("State changed", readState.data);
         if (readState && readState.data) {
             userContextDispatch( { type: "ALERT_CLOSE" });
 
             if (readState.data.edited) {
+                setWebPageTemplateId({value: readState.data.webPageTemplateIdEdits});
                 setType(readState.data.typeEdits);
                 setPath(readState.data.pathEdits);
                 setTitle(readState.data.titleEdits);
@@ -49,6 +70,7 @@ function WebPageEdit() {
                 setContent(readState.data.contentEdits);
                 setParameters(readState.data.parametersEdits);
             } else {
+                setWebPageTemplateId({value: readState.data.webPageTemplateId});
                 setType(readState.data.type);
                 setPath(readState.data.path);
                 setTitle(readState.data.title);
@@ -107,6 +129,7 @@ function WebPageEdit() {
         }
         if (err.length === 0) {
             const webPage = {
+                webPageTemplateIdEdits: webPageTemplateId.value,
                 typeEdits: type,
                 pathEdits: path,
                 titleEdits: title,
@@ -132,6 +155,12 @@ function WebPageEdit() {
     return <div>
         <Container>
             <Form onSubmit={handleSubmit}>
+                <FormGroup>
+                    <Label for="webPageTemplate">Template</Label>
+                    <Select defaultValue={webPageTemplateId}
+                            onChange={setWebPageTemplateId}
+                            options={webPageTemplates} />
+                </FormGroup>
                 <FormGroup>
                     <Label for="path">Path</Label>
                     <Input type="text" name="path" id="path" value={path}

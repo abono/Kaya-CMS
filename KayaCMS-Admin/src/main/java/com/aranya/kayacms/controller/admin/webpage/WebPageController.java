@@ -3,6 +3,7 @@ package com.aranya.kayacms.controller.admin.webpage;
 import com.aranya.kayacms.beans.webpage.WebPage;
 import com.aranya.kayacms.beans.webpage.WebPageId;
 import com.aranya.kayacms.beans.webpage.WebPageSearchCriteria;
+import com.aranya.kayacms.beans.webpagetemplate.WebPageTemplateId;
 import com.aranya.kayacms.beans.website.WebSite;
 import com.aranya.kayacms.controller.admin.BaseAdminController;
 import com.aranya.kayacms.exception.KayaAccessDeniedException;
@@ -54,13 +55,18 @@ public class WebPageController extends BaseAdminController {
     response.setCreateDate(item.getCreateDate().getDate());
     response.setModifyDate(item.getCreateDate().getDate());
     response.setPublishDate(item.getCreateDate() == null ? null : item.getCreateDate().getDate());
+
+    response.setWebPageTemplateId(item.getWebPageTemplateId().getId());
+    response.setWebPageTemplateIdEdits(item.getWebPageTemplateIdEdits().getId());
+
     response.setEdited(
         !StringUtils.isAllEmpty(item.getTypeEdits())
             || !StringUtils.isAllEmpty(item.getPathEdits())
             || !StringUtils.isAllEmpty(item.getTitleEdits())
             || !StringUtils.isAllEmpty(item.getDescriptionEdits())
             || !StringUtils.isAllEmpty(item.getContentEdits())
-            || !StringUtils.isAllEmpty(item.getParametersEdits()));
+            || !StringUtils.isAllEmpty(item.getParametersEdits())
+            || !item.getWebPageTemplateId().equals(item.getWebPageTemplateIdEdits()));
   }
 
   private WebPageResponse convertSearchItem(WebPage item) {
@@ -144,6 +150,9 @@ public class WebPageController extends BaseAdminController {
             .descriptionEdits(webPageRequest.getDescriptionEdits())
             .contentEdits(webPageRequest.getContentEdits())
             .parametersEdits(webPageRequest.getParametersEdits())
+            .webPageTemplateId(new WebPageTemplateId(webPageRequest.getWebPageTemplateIdEdits()))
+            .webPageTemplateIdEdits(
+                new WebPageTemplateId(webPageRequest.getWebPageTemplateIdEdits()))
             .webSiteId(webSite.getWebSiteId())
             .build();
 
@@ -177,6 +186,8 @@ public class WebPageController extends BaseAdminController {
             .descriptionEdits(webPageRequest.getDescriptionEdits())
             .contentEdits(webPageRequest.getContentEdits())
             .parametersEdits(webPageRequest.getParametersEdits())
+            .webPageTemplateIdEdits(
+                new WebPageTemplateId(webPageRequest.getWebPageTemplateIdEdits()))
             .build();
 
     webPage = webPageService.updateWebPage(webPage);
