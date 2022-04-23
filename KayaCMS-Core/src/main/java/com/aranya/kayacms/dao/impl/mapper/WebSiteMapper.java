@@ -11,6 +11,7 @@ public class WebSiteMapper extends AbstractRowMapper<WebSite> {
   public WebSite mapRow(ResultSet rs, int rowNum) throws SQLException {
     return WebSite.builder()
         .webSiteId(new WebSiteId(rs.getLong("web_site_id")))
+        .name(rs.getString("name"))
         .domainName(rs.getString("domain_name"))
         .setUpComplete(rs.getBoolean("set_up_complete"))
         .createDate(extractDayAndTime(rs, "create_date"))

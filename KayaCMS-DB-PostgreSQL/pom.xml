@@ -108,14 +108,14 @@
           <excludeFilterFile>${project.parent.basedir}/config/exclude-spotbugs.xml</excludeFilterFile>
         </configuration>
         <executions>
-	        <execution>
-					  <id>check</id>
-					  <phase>test</phase>
-					  <goals>
-					    <goal>check</goal>
-					  </goals>
-					</execution>
-				</executions>
+          <execution>
+            <id>check</id>
+            <phase>test</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

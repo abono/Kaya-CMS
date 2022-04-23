@@ -41,12 +41,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.github.VEINHORN</groupId>
-        <artifactId>spring-data-sqlfile</artifactId>
-        <version>01061ca5bb</version>
-      </dependency>
-
-      <dependency>
         <groupId>commons-beanutils</groupId>
         <artifactId>commons-beanutils</artifactId>
         <version>1.9.4</version>

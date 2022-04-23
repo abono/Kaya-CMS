@@ -19,6 +19,8 @@ public class WebSite implements Serializable {
 
   private WebSiteId webSiteId;
 
+  private String name;
+
   private String domainName;
 
   private Boolean setUpComplete;

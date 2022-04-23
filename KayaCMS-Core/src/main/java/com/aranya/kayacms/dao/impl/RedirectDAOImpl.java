@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -65,6 +66,8 @@ public class RedirectDAOImpl extends AbstractDAO implements RedirectDAO {
 
     try {
       return jdbcTemplate.queryForObject(sql, paramMap, rowMapper);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
     } catch (DataAccessException e) {
       throw new DetailedSQLException(e, sql, paramMap);
     }
@@ -80,6 +83,8 @@ public class RedirectDAOImpl extends AbstractDAO implements RedirectDAO {
 
     try {
       return jdbcTemplate.queryForObject(sql, paramMap, rowMapper);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
     } catch (DataAccessException e) {
       throw new DetailedSQLException(e, sql, paramMap);
     }

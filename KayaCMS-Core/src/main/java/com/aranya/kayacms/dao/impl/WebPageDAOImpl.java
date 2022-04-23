@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -80,6 +81,8 @@ public class WebPageDAOImpl extends AbstractDAO implements WebPageDAO {
 
     try {
       return jdbcTemplate.queryForObject(sql, paramMap, rowMapper);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
     } catch (DataAccessException e) {
       throw new DetailedSQLException(e, sql, paramMap);
     }
@@ -95,6 +98,8 @@ public class WebPageDAOImpl extends AbstractDAO implements WebPageDAO {
 
     try {
       return jdbcTemplate.queryForObject(sql, paramMap, rowMapper);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
     } catch (DataAccessException e) {
       throw new DetailedSQLException(e, sql, paramMap);
     }

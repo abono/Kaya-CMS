@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +34,8 @@ public class WebSiteDAOImpl extends AbstractDAO implements WebSiteDAO {
 
     try {
       return jdbcTemplate.queryForObject(sql, paramMap, rowMapper);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
     } catch (DataAccessException e) {
       throw new DetailedSQLException(e, sql, paramMap);
     }
@@ -48,6 +51,8 @@ public class WebSiteDAOImpl extends AbstractDAO implements WebSiteDAO {
 
     try {
       return jdbcTemplate.queryForObject(sql, paramMap, rowMapper);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
     } catch (DataAccessException e) {
       throw new DetailedSQLException(e, sql, paramMap);
     }
@@ -57,6 +62,7 @@ public class WebSiteDAOImpl extends AbstractDAO implements WebSiteDAO {
   public WebSiteId insertWebSite(WebSite webSite) throws SQLException {
 
     Map<String, Object> paramMap = new HashMap<>();
+    paramMap.put("name", webSite.getName());
     paramMap.put("domainName", webSite.getDomainName());
     paramMap.put("setUpComplete", webSite.getSetUpComplete());
 
@@ -77,6 +83,7 @@ public class WebSiteDAOImpl extends AbstractDAO implements WebSiteDAO {
 
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put("webSiteId", webSite.getWebSiteId().getId());
+    paramMap.put("name", webSite.getName());
     paramMap.put("domainName", webSite.getDomainName());
     paramMap.put("setUpComplete", webSite.getSetUpComplete());
 
